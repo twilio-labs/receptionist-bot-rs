@@ -1,0 +1,39 @@
+# https://hub.docker.com/_/rust
+FROM rust:1.58.1 as file_loader
+# RUN rustup target add aarch64-unknown-linux-musl
+WORKDIR /usr/src/receptionist_bot
+COPY . .
+############
+
+FROM rust:1.58.1 as builder
+WORKDIR /usr/src/receptionist_bot
+COPY --from=file_loader /usr/src/receptionist_bot /usr/src/receptionist_bot
+RUN cargo install --path ./crates/rec_server
+###############
+
+FROM debian:buster-slim
+# RUN apt-get update && apt-get install -y extra-runtime-dependencies && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y libssl-dev && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt install libnss3-tools -y
+RUN apt-get install wget -y
+
+### setup certificate
+## ARM specific link
+RUN wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-arm64
+RUN cp mkcert-v1.4.3-linux-arm64 /usr/local/bin/mkcert
+RUN chmod +x /usr/local/bin/mkcert
+RUN mkcert -install
+RUN mkcert localhost 127.0.0.1 ::1
+
+COPY --from=builder /usr/local/cargo/bin/rec_server /usr/local/bin/rec_server
+
+EXPOSE 3000
+
+# https://docs.docker.com/engine/reference/builder/#healthcheck
+HEALTHCHECK --interval=10s --timeout=3s \
+    CMD curl -f http://localhost:3000/ || exit 1
+
+
+CMD ["rec_server"]

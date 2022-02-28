@@ -1,0 +1,52 @@
+[package]
+name = "receptionist"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.58"
+authors = ["Saxon Hunt <saxonh.dev@gmail.com>"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = ["dynamodb"]
+dynamodb = []
+tempdb = []
+ansi = ["tracing-subscriber/ansi"]
+
+
+[dependencies]
+axum = "0.4"
+tokio = { version = "1.17", features = ["sync"]}
+slack-morphism = "0.30"
+slack-morphism-models = "0.30"
+slack-morphism-hyper = "0.30"
+# slack-morphism = { git = "https://github.com/noxasaxon/slack-morphism-rust", branch = "fix-permalink"}
+# slack-morphism-models = { git = "https://github.com/noxasaxon/slack-morphism-rust", branch = "fix-permalink"}
+# slack-morphism-hyper = { git = "https://github.com/noxasaxon/slack-morphism-rust", branch = "fix-permalink"}
+serde = "1.0"
+serde_json = "1.0"
+strum = {version="0.23", features=["derive"]}
+tracing = "0.1"
+tracing-subscriber = { version="0.3", default-features=false, features = ["env-filter", "tracing-log", "smallvec", "fmt"] }
+
+regex = "1.5"
+nanoid = "0.4"
+anyhow = "1.0"
+
+
+aws-config = {version = "0.4", features=["rustls"]}
+aws-types = {version = "0.4"}
+aws-sdk-dynamodb = {version = "0.4", features=["rustls"]}
+aws-sdk-cloudformation = {version = "0.4", features=["rustls"]}
+serde_dynamo = { version = "3.0.0-alpha", features = ["aws-sdk-dynamodb+0_4"] }
+
+# slack verification middleware
+hyper = { version = "0.14" }
+# hyper-tls = {version = "0.5"}
+hyper-rustls = {version = "0.23", features = ["webpki-roots", "rustls-native-certs"]}
+rustls = "0.20"
+# webpki-roots = "0.22"
+
+tower = "0.4"
+
+dotenv = "0.15"
+arguably = "2.0"

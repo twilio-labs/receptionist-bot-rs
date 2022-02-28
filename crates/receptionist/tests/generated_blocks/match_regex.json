@@ -1,0 +1,189 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "block_id": "BLOCK-collaborator-selection_IDX_0",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":busts_in_silhouette: Users that can edit this Response"
+      },
+      "accessory": {
+        "type": "multi_users_select",
+        "action_id": "collaborator-selection_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select Collaborators"
+        }
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "block_id": "BLOCK-listener-channel-selected_IDX_0",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":slack: Select a Channel                   :point_right:"
+      },
+      "accessory": {
+        "type": "conversations_select",
+        "action_id": "listener-channel-selected_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "#my-channel"
+        }
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "block_id": "BLOCK-condition-type-selected_IDX_0",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":clipboard: Select a match condition type"
+      },
+      "accessory": {
+        "type": "static_select",
+        "action_id": "condition-type-selected_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "select matching Type"
+        },
+        "options": [
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Phrase Match"
+            },
+            "value": "match-phrase"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Regex Match"
+            },
+            "value": "match-regex"
+          }
+        ],
+        "initial_option": {
+          "text": {
+            "type": "plain_text",
+            "text": "Regex Match"
+          },
+          "value": "match-regex"
+        }
+      }
+    },
+    {
+      "type": "input",
+      "block_id": "BLOCK-message-condition-value-input_IDX_0",
+      "label": {
+        "type": "plain_text",
+        "text": "Message contains a match to this Regex pattern:"
+      },
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "message-condition-value-input_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Regex pattern to match against"
+        },
+        "initial_value": "<my_regex>"
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "_Tip:_ Use regex101.com to validate your syntax first :writing_hand:"
+        }
+      ]
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "block_id": "BLOCK-action-type-selected_IDX_0",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":building_construction: Select an Action to do if conditions are met"
+      },
+      "accessory": {
+        "type": "static_select",
+        "action_id": "action-type-selected_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "select action Type"
+        },
+        "options": [
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Attach Emoji to Message"
+            },
+            "value": "attach-emoji"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Reply with Threaded Message"
+            },
+            "value": "threaded-message"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Post Message to Same Channel"
+            },
+            "value": "channel-message"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Tag OnCall User in Thread"
+            },
+            "value": "msg-oncall-in-thread"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Forward detected message to a different channel"
+            },
+            "value": "forward-message-to-channel"
+          }
+        ],
+        "initial_option": {
+          "text": {
+            "type": "plain_text",
+            "text": "Attach Emoji to Message"
+          },
+          "value": "attach-emoji"
+        }
+      }
+    },
+    {
+      "type": "input",
+      "block_id": "BLOCK-attach-emoji-input_IDX_0",
+      "label": {
+        "type": "plain_text",
+        "text": "Choose an emoji (can also trigger Slack Workflows)"
+      },
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "attach-emoji-input_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "my-emoji"
+        }
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ]
+}

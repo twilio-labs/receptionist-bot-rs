@@ -1,0 +1,7 @@
+# https://docs.docker.com/engine/reference/builder/#dockerignore-file
+.git
+target/
+.terraform*
+terraform*
+.terraform**
+.tfstate

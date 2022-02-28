@@ -1,0 +1,197 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "block_id": "BLOCK-collaborator-selection_IDX_0",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":busts_in_silhouette: Users that can edit this Response"
+      },
+      "accessory": {
+        "type": "multi_users_select",
+        "action_id": "collaborator-selection_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Select Collaborators"
+        }
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "block_id": "BLOCK-listener-channel-selected_IDX_0",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":slack: Select a Channel                   :point_right:"
+      },
+      "accessory": {
+        "type": "conversations_select",
+        "action_id": "listener-channel-selected_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "#my-channel"
+        }
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "block_id": "BLOCK-condition-type-selected_IDX_0",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":clipboard: Select a match condition type"
+      },
+      "accessory": {
+        "type": "static_select",
+        "action_id": "condition-type-selected_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "select matching Type"
+        },
+        "options": [
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Phrase Match"
+            },
+            "value": "match-phrase"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Regex Match"
+            },
+            "value": "match-regex"
+          }
+        ],
+        "initial_option": {
+          "text": {
+            "type": "plain_text",
+            "text": "Phrase Match"
+          },
+          "value": "match-phrase"
+        }
+      }
+    },
+    {
+      "type": "input",
+      "block_id": "BLOCK-message-condition-value-input_IDX_0",
+      "label": {
+        "type": "plain_text",
+        "text": "Message contains this phrase:"
+      },
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "message-condition-value-input_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Phrase to match against"
+        }
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "block_id": "BLOCK-action-type-selected_IDX_0",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":building_construction: Select an Action to do if conditions are met"
+      },
+      "accessory": {
+        "type": "static_select",
+        "action_id": "action-type-selected_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "select action Type"
+        },
+        "options": [
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Attach Emoji to Message"
+            },
+            "value": "attach-emoji"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Reply with Threaded Message"
+            },
+            "value": "threaded-message"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Post Message to Same Channel"
+            },
+            "value": "channel-message"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Tag OnCall User in Thread"
+            },
+            "value": "msg-oncall-in-thread"
+          },
+          {
+            "text": {
+              "type": "plain_text",
+              "text": "Forward detected message to a different channel"
+            },
+            "value": "forward-message-to-channel"
+          }
+        ],
+        "initial_option": {
+          "text": {
+            "type": "plain_text",
+            "text": "Tag OnCall User in Thread"
+          },
+          "value": "msg-oncall-in-thread"
+        }
+      }
+    },
+    {
+      "type": "input",
+      "block_id": "BLOCK-pd-escalation-policy-input_IDX_0",
+      "label": {
+        "type": "plain_text",
+        "text": "Enter the escalation policy to query"
+      },
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "pd-escalation-policy-input_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "Pxxxxxx"
+        },
+        "initial_value": "some_id"
+      }
+    },
+    {
+      "type": "input",
+      "block_id": "BLOCK-pd-threaded-msg-input_IDX_0",
+      "label": {
+        "type": "plain_text",
+        "text": "Enter the message to provide in thread with the tagged user"
+      },
+      "element": {
+        "type": "plain_text_input",
+        "action_id": "pd-threaded-msg-input_IDX_0",
+        "placeholder": {
+          "type": "plain_text",
+          "text": "is oncall and will handle this."
+        },
+        "initial_value": "some_message"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ]
+}

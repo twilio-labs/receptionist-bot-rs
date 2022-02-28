@@ -1,0 +1,27 @@
+["package"]
+name = "rec_server"
+version = "0.1.0"
+edition = "2018"
+authors = ["Saxon Hunt <saxonh.dev@gmail.com>"]
+
+[features]
+default = ["dynamodb"]
+dynamodb = ["receptionist/dynamodb"]
+tempdb = ["receptionist/tempdb"]
+ansi = ["receptionist/ansi"]
+
+
+[dependencies]
+receptionist = { path = "../receptionist", default-features = false}
+axum = "0.4"
+tokio = { version = "1.17", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version="0.3", default-features = false, features = ["env-filter", "tracing-log", "smallvec", "fmt"] }
+tower-http = {version = "0.2", features=["trace"]}
+anyhow = "1.0"
+
+
+[dev-dependencies]
+# testcontainers = "0.12"
+testcontainers = { git= "https://github.com/testcontainers/testcontainers-rs", rev="bec5196f120c112da696be7c9053f63d5811e8c6"}
+reqwest = {version = "0.11", features = ["blocking"] }

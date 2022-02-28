@@ -1,0 +1,24 @@
+["package"]
+name = "rec_lambda_commands"
+version = "0.1.0"
+edition = "2018"
+authors = ["Saxon Hunt <saxonh.dev@gmail.com>"]
+
+# rename the binary to just `bootstrap` during terraform deployment.
+# if we rename it now, it will clash with other lambdas if built in parallel
+
+[features]
+default = ["dynamodb"]
+dynamodb = ["receptionist/dynamodb"]
+tempdb = ["receptionist/tempdb"]
+ansi = ["receptionist/ansi"]
+
+
+[dependencies]
+receptionist = { path = "../receptionist", default-features = false}
+tokio = { version = "1.17", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version="0.3", default-features = false, features = ["env-filter", "tracing-log", "smallvec", "fmt"] }
+# slack-morphism = {git = "https://github.com/noxasaxon/slack-morphism-rust", branch = "fix-permalink"}
+slack-morphism = "0.30"
+lambda_http = "0.4"

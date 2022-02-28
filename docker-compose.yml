@@ -1,0 +1,38 @@
+version: '3.8'
+
+networks:
+  local:
+
+services:
+  localstack: # https://github.com/localstack/localstack/blob/master/docker-compose.yml
+    image: "localstack/localstack:0.13.0.8"
+    networks:
+      - local
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.localstack
+    container_name: localstack
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+    environment:
+      - SERVICES=dynamodb
+
+  receptionist:
+    container_name: receptionist-bot-rs
+    image: "receptionist:local"
+    networks:
+      - local
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.local
+      cache_from:
+        - "receptionist:local"
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    depends_on:
+      - localstack
+    restart: on-failure
+    entrypoint: ["rec_server", "--aws-endpoint-url", "http://localstack:4566", "--fake"]

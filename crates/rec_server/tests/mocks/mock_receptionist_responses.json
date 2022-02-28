@@ -1,0 +1,109 @@
+[
+    {
+        "id": "96tcFMjyfag_JJ2gAhmJA",
+        "listener_type": "slack_channel",
+        "channel_id": "G01EVFPD63V",
+        "conditions": [
+            {
+                "type": "for_message",
+                "criteria": {
+                    "type": "match_regex",
+                    "value": "regex"
+                }
+            }
+        ],
+        "actions": [
+            {
+                "type": "for_message",
+                "value": {
+                    "type": "channel_message",
+                    "value": "someone matched with regex!"
+                }
+            }
+        ],
+        "collaborators": [
+            "UK81X0AJZ"
+        ]
+    },
+    {
+        "id": "TB6v76uR0YDfeQAvidBu-",
+        "listener_type": "slack_channel",
+        "channel_id": "G01EVFPD63V",
+        "conditions": [
+            {
+                "type": "for_message",
+                "criteria": {
+                    "type": "match_phrase",
+                    "value": "matching against this phrase"
+                }
+            }
+        ],
+        "actions": [
+            {
+                "type": "for_message",
+                "value": {
+                    "type": "threaded_message",
+                    "value": "posting this msg to thread"
+                }
+            }
+        ],
+        "collaborators": [
+            "UK81X0AJZ"
+        ]
+    },
+    {
+        "id": "QTjU4drQzC6XCtvz6S9I6",
+        "listener_type": "slack_channel",
+        "channel_id": "G01EVFPD63V",
+        "conditions": [
+            {
+                "type": "for_message",
+                "criteria": {
+                    "type": "match_phrase",
+                    "value": "page someone"
+                }
+            }
+        ],
+        "actions": [
+            {
+                "type": "for_message",
+                "value": {
+                    "type": "msg_oncall_in_thread",
+                    "value": {
+                        "escalation_policy_id": "PLMIEBZ",
+                        "message": "you got paged!"
+                    }
+                }
+            }
+        ],
+        "collaborators": [
+            "UK81X0AJZ"
+        ]
+    },
+    {
+        "id": "F8NBRPeNeaMnE4ncGvpBs",
+        "listener_type": "slack_channel",
+        "channel_id": "G01EVFPD63V",
+        "conditions": [
+            {
+                "type": "for_message",
+                "criteria": {
+                    "type": "match_phrase",
+                    "value": "rust"
+                }
+            }
+        ],
+        "actions": [
+            {
+                "type": "for_message",
+                "value": {
+                    "type": "attach_emoji",
+                    "value": "thumbsup"
+                }
+            }
+        ],
+        "collaborators": [
+            "some_slack_id"
+        ]
+    }
+]

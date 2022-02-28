@@ -1,0 +1,6 @@
+FROM localstack/localstack:0.13.0.8
+
+
+COPY ./dockerfiles/localstack_dynamodb_setup /docker-entrypoint-initaws.d/
+
+ENTRYPOINT ["docker-entrypoint.sh"]

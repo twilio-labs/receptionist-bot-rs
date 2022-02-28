@@ -1,0 +1,69 @@
+display_information:
+  name: Receptionist Bot
+features:
+  bot_user:
+    display_name: Receptionist Bot
+    always_online: false
+  slash_commands:
+    - command: /rec-manage
+      url: <MY_BOT_URL_HERE>/slack/commands
+      description: asdf
+      should_escape: false
+    - command: /rec-cmd
+      url: <MY_BOT_URL_HERE>/slack/commands
+      description: asdf
+      should_escape: false
+oauth_config:
+  scopes:
+    user:
+      - channels:history
+      - channels:read
+      - channels:write
+      - chat:write
+      - emoji:read
+      - mpim:history
+      - reactions:read
+      - reactions:write
+      - usergroups:read
+      - usergroups:write
+      - users.profile:read
+    bot:
+      - app_mentions:read
+      - channels:history
+      - channels:join
+      - channels:manage
+      - channels:read
+      - chat:write
+      - chat:write.customize
+      - chat:write.public
+      - commands
+      - dnd:read
+      - emoji:read
+      - groups:history
+      - groups:read
+      - groups:write
+      - im:history
+      - im:read
+      - im:write
+      - reactions:read
+      - reactions:write
+      - team:read
+      - usergroups:read
+      - usergroups:write
+      - users.profile:read
+      - users:read
+      - users:write
+      - workflow.steps:execute
+      - users:read.email
+settings:
+  event_subscriptions:
+    request_url: <MY_BOT_URL_HERE>/slack/events
+    bot_events:
+      - message.channels
+      - message.groups
+  interactivity:
+    is_enabled: true
+    request_url: <MY_BOT_URL_HERE>/slack/interaction
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false

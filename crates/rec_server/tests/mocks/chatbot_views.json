@@ -1,0 +1,693 @@
+{
+    "views_map": {
+        "function_select": {
+            "blocks": [
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Select a configuration function",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "INPUT-chatbot-function-type",
+                    "dispatch_action": true,
+                    "element": {
+                        "action_id": "ACTION-chatbot-function",
+                        "options": [
+                            {
+                                "text": {
+                                    "text": "Add a new emoji -> keyphrase pair",
+                                    "type": "plain_text"
+                                },
+                                "value": "add"
+                            },
+                            {
+                                "text": {
+                                    "text": "Remove an emoji from chatbot",
+                                    "type": "plain_text"
+                                },
+                                "value": "delete"
+                            },
+                            {
+                                "text": {
+                                    "text": "Update an emoji's keyphrase trigger",
+                                    "type": "plain_text"
+                                },
+                                "value": "update"
+                            }
+                        ],
+                        "placeholder": {
+                            "emoji": true,
+                            "text": "Select a function",
+                            "type": "plain_text"
+                        },
+                        "type": "static_select"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "What would you like to do?",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Current Keywords and Emojis",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "emoji-section-team1",
+                    "fields": [
+                        {
+                            "emoji": true,
+                            "text": ":approved: \"approved\"",
+                            "type": "plain_text"
+                        },
+                        {
+                            "emoji": true,
+                            "text": ":rust: \"rust\"",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "section"
+                },
+                {
+                    "block_id": "context-team1",
+                    "elements": [
+                        {
+                            "text": "^ owned by: team1",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "context"
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "block_id": "emoji-section-team2",
+                    "fields": [
+                        {
+                            "emoji": true,
+                            "text": ":light_circle: \"risky\"",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "section"
+                },
+                {
+                    "block_id": "context-team2",
+                    "elements": [
+                        {
+                            "text": "^ owned by: team2",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "context"
+                },
+                {
+                    "type": "divider"
+                }
+            ],
+            "close": {
+                "emoji": true,
+                "text": "Cancel",
+                "type": "plain_text"
+            },
+            "private_metadata": "function_select",
+            "title": {
+                "emoji": true,
+                "text": "Select a Function",
+                "type": "plain_text"
+            },
+            "type": "modal"
+        },
+        "delete": {
+            "blocks": [
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Select a configuration function",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "INPUT-chatbot-function-type",
+                    "dispatch_action": true,
+                    "element": {
+                        "action_id": "ACTION-chatbot-function",
+                        "options": [
+                            {
+                                "text": {
+                                    "text": "Add a new emoji -> keyphrase pair",
+                                    "type": "plain_text"
+                                },
+                                "value": "add"
+                            },
+                            {
+                                "text": {
+                                    "text": "Remove an emoji from chatbot",
+                                    "type": "plain_text"
+                                },
+                                "value": "delete"
+                            },
+                            {
+                                "text": {
+                                    "text": "Update an emoji's keyphrase trigger",
+                                    "type": "plain_text"
+                                },
+                                "value": "update"
+                            }
+                        ],
+                        "placeholder": {
+                            "emoji": true,
+                            "text": "Select a function",
+                            "type": "plain_text"
+                        },
+                        "type": "static_select"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "What would you like to do?",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Select any emojis to delete",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "INPUT-chatbot-delete",
+                    "element": {
+                        "action_id": "ACTION-chatbot-delete",
+                        "options": [
+                            {
+                                "text": {
+                                    "emoji": true,
+                                    "text": ":approved: - \"approved\"",
+                                    "type": "plain_text"
+                                },
+                                "value": "3874fe2c4e87484cbe3744271cdc29d5"
+                            },
+                            {
+                                "text": {
+                                    "emoji": true,
+                                    "text": ":rust: - \"rust\"",
+                                    "type": "plain_text"
+                                },
+                                "value": "aac8bb95229b400b92139c752de59fa1"
+                            }
+                        ],
+                        "placeholder": {
+                            "emoji": true,
+                            "text": "Select emoji to delete",
+                            "type": "plain_text"
+                        },
+                        "type": "multi_static_select"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "Delete your team's emojis",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Current Keywords and Emojis",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "emoji-section-team1",
+                    "fields": [
+                        {
+                            "emoji": true,
+                            "text": ":approved: \"approved\"",
+                            "type": "plain_text"
+                        },
+                        {
+                            "emoji": true,
+                            "text": ":rust: \"rust\"",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "section"
+                },
+                {
+                    "block_id": "context-team1",
+                    "elements": [
+                        {
+                            "text": "^ owned by: team1",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "context"
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "block_id": "emoji-section-team2",
+                    "fields": [
+                        {
+                            "emoji": true,
+                            "text": ":light_circle: \"risky\"",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "section"
+                },
+                {
+                    "block_id": "context-team2",
+                    "elements": [
+                        {
+                            "text": "^ owned by: team2",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "context"
+                },
+                {
+                    "type": "divider"
+                }
+            ],
+            "close": {
+                "emoji": true,
+                "text": "Cancel",
+                "type": "plain_text"
+            },
+            "private_metadata": "delete",
+            "submit": {
+                "emoji": true,
+                "text": "Submit",
+                "type": "plain_text"
+            },
+            "title": {
+                "emoji": true,
+                "text": "Delete Chatbot Emojis",
+                "type": "plain_text"
+            },
+            "type": "modal"
+        },
+        "add": {
+            "blocks": [
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Select a configuration function",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "INPUT-chatbot-function-type",
+                    "dispatch_action": true,
+                    "element": {
+                        "action_id": "ACTION-chatbot-function",
+                        "options": [
+                            {
+                                "text": {
+                                    "text": "Add a new emoji -> keyphrase pair",
+                                    "type": "plain_text"
+                                },
+                                "value": "add"
+                            },
+                            {
+                                "text": {
+                                    "text": "Remove an emoji from chatbot",
+                                    "type": "plain_text"
+                                },
+                                "value": "delete"
+                            },
+                            {
+                                "text": {
+                                    "text": "Update an emoji's keyphrase trigger",
+                                    "type": "plain_text"
+                                },
+                                "value": "update"
+                            }
+                        ],
+                        "placeholder": {
+                            "emoji": true,
+                            "text": "Select a function",
+                            "type": "plain_text"
+                        },
+                        "type": "static_select"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "What would you like to do?",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Manage Your Keywords",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "text": {
+                        "text": "For help choosing the right emoji, check out the <https://<todo_domain>.slack.com/customize/emoji|Emoji Finder>",
+                        "type": "mrkdwn"
+                    },
+                    "type": "section"
+                },
+                {
+                    "block_id": "INPUT-keyword-text",
+                    "element": {
+                        "action_id": "ACTION-keyword-text",
+                        "placeholder": {
+                            "emoji": true,
+                            "text": "firewall rule",
+                            "type": "plain_text"
+                        },
+                        "type": "plain_text_input"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "Keyword",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "block_id": "INPUT-emoji-text",
+                    "element": {
+                        "action_id": "ACTION-emoji-text",
+                        "placeholder": {
+                            "emoji": true,
+                            "text": ":firewall:",
+                            "type": "plain_text"
+                        },
+                        "type": "plain_text_input"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "Emoji",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Current Keywords and Emojis",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "emoji-section-team1",
+                    "fields": [
+                        {
+                            "emoji": true,
+                            "text": ":approved: \"approved\"",
+                            "type": "plain_text"
+                        },
+                        {
+                            "emoji": true,
+                            "text": ":rust: \"rust\"",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "section"
+                },
+                {
+                    "block_id": "context-team1",
+                    "elements": [
+                        {
+                            "text": "^ owned by: team1",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "context"
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "block_id": "emoji-section-team2",
+                    "fields": [
+                        {
+                            "emoji": true,
+                            "text": ":light_circle: \"risky\"",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "section"
+                },
+                {
+                    "block_id": "context-team2",
+                    "elements": [
+                        {
+                            "text": "^ owned by: team2",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "context"
+                },
+                {
+                    "type": "divider"
+                }
+            ],
+            "close": {
+                "emoji": true,
+                "text": "Cancel",
+                "type": "plain_text"
+            },
+            "private_metadata": "add",
+            "submit": {
+                "emoji": true,
+                "text": "Submit",
+                "type": "plain_text"
+            },
+            "title": {
+                "emoji": true,
+                "text": "Add Keyword -> Emoji",
+                "type": "plain_text"
+            },
+            "type": "modal"
+        },
+        "update": {
+            "blocks": [
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Select a configuration function",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "INPUT-chatbot-function-type",
+                    "dispatch_action": true,
+                    "element": {
+                        "action_id": "ACTION-chatbot-function",
+                        "options": [
+                            {
+                                "text": {
+                                    "text": "Add a new emoji -> keyphrase pair",
+                                    "type": "plain_text"
+                                },
+                                "value": "add"
+                            },
+                            {
+                                "text": {
+                                    "text": "Remove an emoji from chatbot",
+                                    "type": "plain_text"
+                                },
+                                "value": "delete"
+                            },
+                            {
+                                "text": {
+                                    "text": "Update an emoji's keyphrase trigger",
+                                    "type": "plain_text"
+                                },
+                                "value": "update"
+                            }
+                        ],
+                        "placeholder": {
+                            "emoji": true,
+                            "text": "Select a function",
+                            "type": "plain_text"
+                        },
+                        "type": "static_select"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "What would you like to do?",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Choose an emoji and update it's keyphrase",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "INPUT-chatbot-update",
+                    "element": {
+                        "action_id": "ACTION-chatbot-update",
+                        "options": [
+                            {
+                                "text": {
+                                    "emoji": true,
+                                    "text": ":approved: - \"approved\"",
+                                    "type": "plain_text"
+                                },
+                                "value": "3874fe2c4e87484cbe3744271cdc29d5"
+                            },
+                            {
+                                "text": {
+                                    "emoji": true,
+                                    "text": ":rust: - \"rust\"",
+                                    "type": "plain_text"
+                                },
+                                "value": "aac8bb95229b400b92139c752de59fa1"
+                            }
+                        ],
+                        "placeholder": {
+                            "emoji": true,
+                            "text": "Select emoji to update",
+                            "type": "plain_text"
+                        },
+                        "type": "static_select"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "Update an Emoji Keyphrase",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "block_id": "INPUT-keyword-text",
+                    "element": {
+                        "action_id": "ACTION-keyword-text",
+                        "placeholder": {
+                            "emoji": true,
+                            "text": "firewall rule",
+                            "type": "plain_text"
+                        },
+                        "type": "plain_text_input"
+                    },
+                    "label": {
+                        "emoji": true,
+                        "text": "Keyphrase",
+                        "type": "plain_text"
+                    },
+                    "type": "input"
+                },
+                {
+                    "text": {
+                        "emoji": true,
+                        "text": "Current Keywords and Emojis",
+                        "type": "plain_text"
+                    },
+                    "type": "header"
+                },
+                {
+                    "block_id": "emoji-section-team1",
+                    "fields": [
+                        {
+                            "emoji": true,
+                            "text": ":approved: \"approved\"",
+                            "type": "plain_text"
+                        },
+                        {
+                            "emoji": true,
+                            "text": ":rust: \"rust\"",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "section"
+                },
+                {
+                    "block_id": "context-team1",
+                    "elements": [
+                        {
+                            "text": "^ owned by: team1",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "context"
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "block_id": "emoji-section-team2",
+                    "fields": [
+                        {
+                            "emoji": true,
+                            "text": ":light_circle: \"risky\"",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "section"
+                },
+                {
+                    "block_id": "context-team2",
+                    "elements": [
+                        {
+                            "text": "^ owned by: team2",
+                            "type": "plain_text"
+                        }
+                    ],
+                    "type": "context"
+                },
+                {
+                    "type": "divider"
+                }
+            ],
+            "close": {
+                "emoji": true,
+                "text": "Cancel",
+                "type": "plain_text"
+            },
+            "private_metadata": "update",
+            "submit": {
+                "emoji": true,
+                "text": "Submit",
+                "type": "plain_text"
+            },
+            "title": {
+                "emoji": true,
+                "text": "Update Emoji Keyphrase",
+                "type": "plain_text"
+            },
+            "type": "modal"
+        }
+    }
+}

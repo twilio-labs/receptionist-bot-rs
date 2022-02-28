@@ -1,0 +1,50 @@
+{
+    "KeySchema": [
+        {
+            "AttributeName": "pk",
+            "KeyType": "HASH"
+        },
+        {
+            "AttributeName": "sk",
+            "KeyType": "RANGE"
+        }
+    ],
+    "AttributeDefinitions": [
+        {
+            "AttributeName": "pk",
+            "AttributeType": "S"
+        },
+        {
+            "AttributeName": "sk",
+            "AttributeType": "S"
+        }
+    ],
+    "GlobalSecondaryIndexes": [
+        {
+            "IndexName": "InvertedIndex",
+            "KeySchema": [
+                {
+                    "AttributeName": "sk",
+                    "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "pk",
+                    "KeyType": "RANGE"
+                }
+            ],
+            "Projection": {
+                "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+            }
+        }
+    ],
+    "BillingMode": "PROVISIONED",
+    "TableName": "receptionist_bot",
+    "ProvisionedThroughput": {
+        "ReadCapacityUnits": 1,
+        "WriteCapacityUnits": 1
+    }
+}
