@@ -94,18 +94,18 @@ send webhook with custom payload | Planned   | Slack Message
 3. Copy a json template from [./crates/receptionist/tests/generated_blocks](./crates/receptionist/tests/generated_blocks) and paste it into the Block Kit json editor
 
 ## Special Thanks & Shoutouts
-- @abdolence for creating the excellent [`slack-morphism` library](https://github.com/abdolence/slack-morphism-rust).
+- [@abdolence](https://github.com/abdolence) for creating the excellent [`slack-morphism` library](https://github.com/abdolence/slack-morphism-rust).
   - `slack-morphism` strongly types nearly everything you need to work with Slack, including block kit models which are a huge pain point when doing highly reactive & dynamic UIs like the Receptionist Bot. This app would not have been possible without his work!
-  - @abdolence also [quickly responded to questions](https://github.com/abdolence/slack-morphism-rust/issues/69) with thorough answers and helpful tips
-- @davidpdrsn for the [Axum](https://github.com/tokio-rs/axum) web application framework.
+  - [@abdolence](https://github.com/abdolence) also [quickly responded to questions](https://github.com/abdolence/slack-morphism-rust/issues/69) with thorough answers and helpful tips
+- [@davidpdrsn](https://github.com/davidpdrsn) for the [Axum](https://github.com/tokio-rs/axum) web application framework.
   - Axum is easy to use and is built with `hyper` & `tokio`, but also uses the `Tower` ecosystem so that you can share middleware/services/utilities, between any other framework that uses `hyper` or `tonic`. You can also often share code between server-side and client side implementations.
   - You can apply middlewares & Layers to only affect certain routes. In this App we use a Slack Verification Middleware from `slack-morphism` to protect our routes that expect to receive traffic from Slack, but not for other routes.
-  - @davidpdrsn also [quickly helped out when I struggled to integrate an authentication middleware](https://github.com/tokio-rs/axum/discussions/625).
-- @yusuphisms for experimenting with the Pagerduty API to enable new bot features, helping incorporate Docker Compose & DynamoDB support, and setting up for integration tests.
-- @ubaniabalogun for thoroughly designing an effective DynamoDB model to enable a wide range of queries with a single Table.
-- @shadyproject for helping load test and brainstorming deployment & database strategies.
+  - [@davidpdrsn](https://github.com/davidpdrsn) also [quickly helped out when I struggled to integrate an authentication middleware](https://github.com/tokio-rs/axum/discussions/625).
+- [@yusuphisms](https://github.com/yusuphisms) for experimenting with the Pagerduty API to enable new bot features, helping incorporate Docker Compose & DynamoDB support, and setting up for integration tests.
+- [@ubaniabalogun](https://github.com/ubaniabalogun) for thoroughly designing an effective DynamoDB model to enable a wide range of queries with a single Table.
+- [@shadyproject](https://github.com/shadyproject) for helping load test and brainstorming deployment & database strategies.
 - Everyone who has worked on [`strum`](https://github.com/Peternator7/strum) which powers up the already great Rust enums
-- @bryanburgers for his work on [https://github.com/zenlist/serde_dynamo](serde_dynamo) which makes it easier to use dynamoDB (and the alpha branch supports the brand new aws_rust_sdk!)
+- [@bryanburgers](https://github.com/bryanburgers) for his work on [https://github.com/zenlist/serde_dynamo](serde_dynamo) which makes it easier to use dynamoDB (and the alpha branch supports the brand new aws_rust_sdk!)
 
 ## Code of Conduct
 https://github.com/twilio-labs/.github/blob/master/CODE_OF_CONDUCT.md 
