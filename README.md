@@ -2,9 +2,9 @@
 
 Slack bot for self-servicing automation of common or predictable tasks.
 
-Receptionist bot aims to provide a no-code frontend for technical & non-technical users to easily automate away some of the tedious repetition that can permeate Slack as companies grow larger. Its scope is narrow: rather than replacing the first-party Slack Workflows system or becoming an entire automation ecosystem such as [SOCless](https://github.com/twilio-labs/socless), the Receptionist bot is bridging the gap between the promise of Slack Workflows and the current state provided to users.
+Receptionist bot aims to provide a no-code frontend for technical & non-technical users to easily automate away some of the tedious repetition that can permeate Slack as companies grow larger. Its scope is narrow: rather than replacing the first-party Slack Workflows system or becoming an entire ecosystem such as [SOCless](https://github.com/twilio-labs/socless), the Receptionist bot bridges the gap between the promise of Slack Workflows and the current state provided to users while also providing workflow automations for free-tier communities.
 
-Having said that, the app is designed to be highly extensible for enabling new features in your workflows and unopinionated with regards to its deployment infrastructure. 
+The app is designed to be highly extensible for new features in your workflows and is unopinionated with regards to its deployment infrastructure. 
 
 
 - [Developing the bot in a local environment (with or without docker)](./docs/development.md#local-development)
