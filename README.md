@@ -35,6 +35,7 @@ This project is a monorepo, meaning it contains multiple crates or (packages) in
 - [`xtask`](crates/xtask/) - [xtask](https://github.com/matklad/cargo-xtask) exposes a small Rust CLI for build scripts related to the project, similar to a makefile or `npm run`. 
 - [`terraform_aws`](./terraform_aws) - Terraform code for deploying either as a standalone server or serverless functions
 - [`docs`](./docs) - A collection of guides on [deployments](docs/deployments.md), [project architecture](docs/architecture.md), and [development](docs/development.md)
+- [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
