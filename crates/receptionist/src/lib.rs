@@ -1,3 +1,5 @@
+// Copyright (c) 2022 Twilio Inc.
+
 #[cfg(all(feature = "tempdb", feature = "dynamodb"))]
 compile_error!("cannot enable multiple db features");
 
