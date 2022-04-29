@@ -1,7 +1,9 @@
 use crate::config::get_or_init_app_config;
+use crate::ReceptionistError;
 use crate::ReceptionistListener;
 use crate::ReceptionistResponse;
-use anyhow::{anyhow, bail, Result};
+
+// use anyhow::{anyhow, bail, Result};
 use aws_sdk_dynamodb::model::{
     AttributeValue, DeleteRequest, KeysAndAttributes, PutRequest, WriteRequest,
 };
@@ -64,7 +66,9 @@ pub async fn setup_dynamo_client(
     }
 }
 
-pub async fn create_response(rec_response: ReceptionistResponse) -> Result<BatchWriteItemOutput> {
+pub async fn create_response(
+    rec_response: ReceptionistResponse,
+) -> Result<BatchWriteItemOutput, ReceptionistError> {
     let client = get_or_init_dynamo_client().await;
 
     let table_items_before_formatting = convert_response_to_table_items(rec_response)?;
@@ -96,7 +100,7 @@ pub async fn create_response(rec_response: ReceptionistResponse) -> Result<Batch
 
 pub async fn get_responses_for_listener(
     listener: ReceptionistListener,
-) -> Result<Vec<ReceptionistResponse>> {
+) -> Result<Vec<ReceptionistResponse>, ReceptionistError> {
     let client = get_or_init_dynamo_client().await;
 
     let result = client
@@ -117,7 +121,9 @@ pub async fn get_responses_for_listener(
     Ok(from_items(result.items().unwrap().to_owned())?)
 }
 
-pub async fn get_response_by_id(response_id: &str) -> Result<ReceptionistResponse> {
+pub async fn get_response_by_id(
+    response_id: &str,
+) -> Result<ReceptionistResponse, ReceptionistError> {
     let client = get_or_init_dynamo_client().await;
 
     let result = client
@@ -133,7 +139,7 @@ pub async fn get_response_by_id(response_id: &str) -> Result<ReceptionistRespons
     let items = result.items();
 
     if count == 0 {
-        bail!("Item not found")
+        Err(ReceptionistError::DatabaseError("Item not found".into()))?
     } else {
         let mut all_responses: Vec<ReceptionistResponse> = Vec::new();
         for item in items.unwrap().to_owned() {
@@ -148,14 +154,19 @@ pub async fn get_response_by_id(response_id: &str) -> Result<ReceptionistRespons
         }
 
         if all_responses.len() != 1 {
-            bail!("More than 1 response found for this ID: {}", response_id)
+            Err(ReceptionistError::DatabaseError(format!(
+                "More than 1 response found for this ID: {}",
+                response_id
+            )))?
         }
 
         return Ok(all_responses.first().unwrap().to_owned());
     }
 }
 
-pub async fn delete_response(rec_response: ReceptionistResponse) -> Result<BatchWriteItemOutput> {
+pub async fn delete_response(
+    rec_response: ReceptionistResponse,
+) -> Result<BatchWriteItemOutput, ReceptionistError> {
     let client = get_or_init_dynamo_client().await;
 
     let table_items_before_formatting = convert_response_to_table_items(rec_response)?;
@@ -186,11 +197,15 @@ pub async fn delete_response(rec_response: ReceptionistResponse) -> Result<Batch
     Ok(output)
 }
 
-pub async fn update_response(response: ReceptionistResponse) -> Result<BatchWriteItemOutput> {
+pub async fn update_response(
+    response: ReceptionistResponse,
+) -> Result<BatchWriteItemOutput, ReceptionistError> {
     create_response(response).await
 }
 
-async fn get_collaborator_items(user_id: &str) -> Result<Vec<ReceptionistTableItem>> {
+async fn get_collaborator_items(
+    user_id: &str,
+) -> Result<Vec<ReceptionistTableItem>, ReceptionistError> {
     let client = get_or_init_dynamo_client().await;
 
     let result = client
@@ -210,7 +225,9 @@ async fn get_collaborator_items(user_id: &str) -> Result<Vec<ReceptionistTableIt
     )?)
 }
 
-pub async fn get_responses_for_collaborator(user_id: &str) -> Result<Vec<ReceptionistResponse>> {
+pub async fn get_responses_for_collaborator(
+    user_id: &str,
+) -> Result<Vec<ReceptionistResponse>, ReceptionistError> {
     let collaborator_items = get_collaborator_items(user_id).await?;
 
     if collaborator_items.is_empty() {
@@ -302,7 +319,7 @@ pub async fn wait_for_table(_table_name: &str, _override_url: &str) {
 
 fn convert_response_to_table_items(
     rec_response: ReceptionistResponse,
-) -> Result<Vec<ReceptionistTableItem>> {
+) -> Result<Vec<ReceptionistTableItem>, ReceptionistError> {
     let mut all_items = vec![];
 
     let response_pkey: ListenerPKey = rec_response.listener.clone().into();
@@ -381,13 +398,14 @@ impl From<ReceptionistListener> for ListenerPKey {
 }
 
 impl TryInto<ReceptionistListener> for ListenerPKey {
-    type Error = anyhow::Error;
+    type Error = ReceptionistError;
 
-    fn try_into(self) -> Result<ReceptionistListener> {
-        let (listener_type, value) = self
-            .0
-            .split_once("/")
-            .ok_or_else(|| anyhow!("Unable to find PKey delimiter"))?;
+    fn try_into(self) -> Result<ReceptionistListener, ReceptionistError> {
+        let (listener_type, value) = self.0.split_once("/").ok_or_else(|| {
+            ReceptionistError::DatabaseError(
+                "Unable to find PKey delimiter to convert response to dynamodb type".into(),
+            )
+        })?;
 
         let listener = ReceptionistListener::from_str(listener_type)?;
 
