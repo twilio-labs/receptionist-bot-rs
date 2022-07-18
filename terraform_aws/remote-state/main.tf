@@ -9,13 +9,12 @@ terraform {
 }
 
 provider "aws" {
-  profile = "default"
   region  = "us-west-2"
 }
 
 ### Terraform State ############
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "terraform-receptionist-bot-state"
+  # bucket = "terraform-receptionist-bot-state"
   # Enable versioning so we can see the full revision history of our state files
   versioning {
     enabled = true
