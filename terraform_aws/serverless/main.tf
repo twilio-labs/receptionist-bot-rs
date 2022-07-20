@@ -18,6 +18,20 @@ provider "aws" {
   region  = "us-west-2"
 }
 
+### GLOBAL DATA 
+### region = ${data.aws_region.current.name}
+### account_id = ${data.aws_caller_identity.current.account_id}
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+terraform {
+  backend "s3" {
+    key            = "global/s3/terraform.tfstate"
+    encrypt        = true
+    dynamodb_table = "terraform-receptionist-locks"
+  }
+}
+
 
 ### SSM Secrets (from the ./secrets folder)
 resource "aws_ssm_parameter" "slack_token_parameter" {
@@ -245,7 +259,7 @@ resource "aws_apigatewayv2_deployment" "api" {
   api_id      = aws_apigatewayv2_api.api.id
   description = "API deployment"
 
-  conditions = {
+  triggers = {
     redeployment = sha1(join(",", tolist([
       jsonencode(aws_apigatewayv2_integration.events_api),
       jsonencode(aws_apigatewayv2_route.events_api),

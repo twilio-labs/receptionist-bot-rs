@@ -12,8 +12,7 @@ terraform {
 }
 
 provider "aws" {
-  profile = "default"
-  region  = "us-west-2"
+  region = "us-west-2"
 }
 
 ### GLOBAL DATA 
@@ -24,11 +23,9 @@ data "aws_region" "current" {}
 
 terraform {
   backend "s3" {
-    bucket         = "terraform-receptionist-bot-state"
     key            = "global/s3/terraform.tfstate"
-    region         = "us-west-2"
-    dynamodb_table = "terraform-receptionist-locks"
     encrypt        = true
+    dynamodb_table = "terraform-receptionist-locks"
   }
 }
 

@@ -24,13 +24,13 @@ With Rust, the resource usage is so low that it can run at high throughput on th
 
 #### Step 2 - Deploy Terraform Remote State Backend
 1. `cd terraform_aws/remote-state`
-2. `terraform init`
+2. `terraform init -backend-config="../config/config.s3.tfbackend"`
 3. `terraform plan`, then `terraform apply` and approve
 
 #### Step 3 - Deploy App with Terraform + Docker + AWScli
 **Docker must be running and aws cli (v2) must be installed!**
 1. `cd terraform_aws/server`
-2. `terraform init`
+2. `terraform init -backend-config="../config/config.s3.tfbackend"`
 3. `terraform plan`, then `terraform apply` and approve
 
 #### Step 4 - Create or Update your Bot in Slack
@@ -64,12 +64,12 @@ With Rust you get the fastest cold starts possible so there is no risk of Slack 
 
 #### Step 4 - Deploy Terraform Remote State Backend
 1. `cd terraform_aws/remote-state`
-2. `terraform init`
+2. `terraform init -backend-config="../config/config.s3.tfbackend"`
 3. `terraform plan`, then `terraform apply` and approve
 
 #### Step 5 - Deploy App with Terraform
 1. `cd terraform_aws/serverless`
-2. `terraform init`
+2. `terraform init -backend-config="../config/config.s3.tfbackend"`
 3. `terraform plan`, then `terraform apply` and approve
 
 #### Step 6 - Create or Update your Bot in Slack
