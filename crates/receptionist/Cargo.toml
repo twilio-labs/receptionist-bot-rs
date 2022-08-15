@@ -50,3 +50,6 @@ tower = "0.4"
 
 dotenv = "0.15"
 arguably = "2.0"
+
+derive-alias = "0.1.0"
+macro_rules_attribute = "0.1.2"
