@@ -1,140 +1,22 @@
-use crate::{BlockSectionRouter, ReceptionistListener, SlackBlockValidationError};
-use anyhow::{anyhow, bail, Result};
+use super::traits::ForListenerEvent;
+use super::{listeners::ListenerEventDiscriminants, traits::SlackEditor};
+use crate::{BlockSectionRouter, EnumUtils, SlackBlockValidationError};
+use anyhow::Result;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use slack_morphism::prelude::*;
 use std::str::FromStr;
-use strum::{EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
+use strum::EnumString;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, EnumDiscriminants, Clone)]
-#[strum_discriminants(derive(EnumIter))]
-#[serde(rename_all = "snake_case", tag = "type", content = "criteria")]
-#[strum(serialize_all = "kebab_case")]
-pub enum ReceptionistCondition {
-    ForMessage(MessageCondition),
-}
-
-impl ReceptionistCondition {
-    pub fn is_valid(&self) -> bool {
-        match self {
-            ReceptionistCondition::ForMessage(message_condition) => message_condition.is_valid(),
-        }
-    }
-
-    pub fn default_from_listener(listener: &ReceptionistListener) -> Self {
-        match listener {
-            ReceptionistListener::SlackChannel { .. } => {
-                Self::ForMessage(MessageCondition::MatchPhrase("".into()))
-            }
-        }
-    }
-
-    pub fn default_blocks(
-        listener: &ReceptionistListener,
-        index: Option<usize>,
-    ) -> Vec<SlackBlock> {
-        Self::default_from_listener(listener).to_editor_blocks(index)
-    }
-
-    pub fn to_editor_blocks(&self, index: Option<usize>) -> Vec<SlackBlock> {
-        match self {
-            ReceptionistCondition::ForMessage(message_condition) => {
-                message_condition.to_editor_blocks(index)
-            }
-        }
-    }
-
-    pub fn message_phrase(phrase: &str) -> Self {
-        Self::ForMessage(MessageCondition::MatchPhrase(phrase.to_string()))
-    }
-
-    pub fn iter_discriminants() -> ReceptionistConditionDiscriminantsIter {
-        ReceptionistConditionDiscriminants::iter()
-    }
-
-    pub fn update_condition_type_from_action_info(
-        &mut self,
-        action: SlackInteractionActionInfo,
-    ) -> Result<()> {
-        let action_value = action
-            .selected_option
-            .ok_or_else(|| anyhow!("no option selected"))?
-            .value;
-        self.update_condition_type(&action_value)?;
-        Ok(())
-    }
-
-    pub fn update_condition_type(&mut self, type_str: &str) -> Result<()> {
-        match self {
-            Self::ForMessage(message_condition) => {
-                let mut new_variant = MessageCondition::from_str(type_str)?;
-                match message_condition {
-                    MessageCondition::MatchPhrase(cur_str) => {
-                        new_variant.update_string(std::mem::take(cur_str))
-                    }
-                    MessageCondition::MatchRegex(cur_str) => {
-                        new_variant.update_string(std::mem::take(cur_str))
-                    }
-                };
-                *message_condition = new_variant;
-            }
-        }
-        Ok(())
-    }
-
-    pub fn update_message_condition_string(&mut self, new_str: String) -> Result<()> {
-        match self {
-            ReceptionistCondition::ForMessage(message_condition) => {
-                message_condition.update_string(new_str);
-            }
-            #[allow(unreachable_patterns)]
-            _ => bail!("Not a message condition"),
-        };
-        Ok(())
-    }
-
-    pub fn validate(&self, index: Option<usize>) -> Option<SlackBlockValidationError> {
-        match self {
-            ReceptionistCondition::ForMessage(msg_condition) => match msg_condition {
-                MessageCondition::MatchPhrase(phrase) => {
-                    if phrase.is_empty() {
-                        Some(SlackBlockValidationError {
-                            block_id: BlockSectionRouter::MessageConditionValueInput
-                                .to_block_id(index),
-                            error_message: "input field is empty".to_string(),
-                        })
-                    } else {
-                        None
-                    }
-                }
-                MessageCondition::MatchRegex(re_str) => match Regex::new(re_str) {
-                    Ok(_) => None,
-                    Err(re_err) => Some(SlackBlockValidationError {
-                        block_id: BlockSectionRouter::MessageConditionValueInput.to_block_id(index),
-                        error_message: re_err.to_string(),
-                    }),
-                },
-            },
-        }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, EnumIter, strum::Display, Clone, EnumString)]
+#[derive(EnumUtils!, Serialize, Deserialize, Clone, EnumString)]
 #[serde(rename_all = "snake_case", tag = "type", content = "value")]
 #[strum(serialize_all = "kebab_case")]
-pub enum MessageCondition {
+pub enum Condition {
     MatchPhrase(String),
     MatchRegex(String),
 }
 
-impl MessageCondition {
-    pub fn is_valid(&self) -> bool {
-        match self {
-            MessageCondition::MatchPhrase(s) => !s.is_empty(),
-            MessageCondition::MatchRegex(s) => !s.is_empty() && Regex::new(s).is_ok(),
-        }
-    }
-
+impl Condition {
     pub fn update_string(&mut self, new_string: String) {
         *self = match self {
             Self::MatchPhrase(_current) => Self::MatchPhrase(new_string),
@@ -142,21 +24,50 @@ impl MessageCondition {
         };
     }
 
-    pub fn to_choice_item(&self) -> SlackBlockChoiceItem<SlackBlockPlainTextOnly> {
-        SlackBlockChoiceItem::new(pt!(self.to_description()), self.to_string())
-    }
-
-    fn to_description(&self) -> &str {
-        match &self {
-            MessageCondition::MatchPhrase(_) => "Phrase Match",
-            MessageCondition::MatchRegex(_) => "Regex Match",
+    fn is_valid(&self) -> bool {
+        match self {
+            Condition::MatchPhrase(s) => !s.is_empty(),
+            Condition::MatchRegex(s) => !s.is_empty() && Regex::new(s).is_ok(),
         }
     }
 
-    pub fn to_choice_items() -> Vec<SlackBlockChoiceItem<SlackBlockPlainTextOnly>> {
-        Self::iter()
-            .map(|variant| variant.to_choice_item())
-            .collect()
+    pub fn should_trigger(&self, message: &str) -> bool {
+        match &self {
+            Condition::MatchPhrase(phrase) => {
+                let re = Regex::new(format!("\\b{phrase}\\b").as_str())
+                    .expect("Unable to compile regex for search phrase");
+                re.is_match(message)
+            }
+            Condition::MatchRegex(reg) => {
+                let re = Regex::new(reg)
+                    .expect("Unable to compile regex for custom regex pattern search phrase");
+                re.is_match(message)
+            }
+        }
+    }
+}
+
+impl ForListenerEvent for Condition {
+    fn listeners(&self) -> Vec<ListenerEventDiscriminants> {
+        match self {
+            Condition::MatchPhrase(_) => vec![ListenerEventDiscriminants::SlackChannelMessage],
+            Condition::MatchRegex(_) => vec![ListenerEventDiscriminants::SlackChannelMessage],
+        }
+    }
+
+    fn default_from_listener(listener: &ListenerEventDiscriminants) -> Self {
+        match listener {
+            ListenerEventDiscriminants::SlackChannelMessage => Self::MatchPhrase(String::default()),
+        }
+    }
+}
+
+impl SlackEditor for Condition {
+    fn to_description(&self) -> &str {
+        match &self {
+            Condition::MatchPhrase(_) => "Phrase Match",
+            Condition::MatchRegex(_) => "Regex Match",
+        }
     }
 
     fn to_type_selector_blocks(&self, index: Option<usize>) -> Vec<SlackBlock> {
@@ -177,7 +88,7 @@ impl MessageCondition {
 
     fn to_value_input_blocks(&self, index: Option<usize>) -> Vec<SlackBlock> {
         match self {
-            MessageCondition::MatchPhrase(phrase) => {
+            Condition::MatchPhrase(phrase) => {
                 let input_element = SlackBlockPlainTextInputElement::new(
                     BlockSectionRouter::MessageConditionValueInput.to_action_id(index),
                     pt!("Phrase to match against"),
@@ -200,7 +111,7 @@ impl MessageCondition {
                 )]
             }
 
-            MessageCondition::MatchRegex(regex_str) => {
+            Condition::MatchRegex(regex_str) => {
                 let input_element = SlackBlockPlainTextInputElement::new(
                     BlockSectionRouter::MessageConditionValueInput.to_action_id(index),
                     pt!("Regex pattern to match against"),
@@ -231,27 +142,36 @@ impl MessageCondition {
         }
     }
 
-    pub fn to_editor_blocks(&self, index: Option<usize>) -> Vec<SlackBlock> {
-        [
-            self.to_type_selector_blocks(index),
-            self.to_value_input_blocks(index),
-            vec![SlackDividerBlock::new().into()],
-        ]
-        .concat()
+    fn change_selection(&mut self, type_str: &str) -> Result<()> {
+        let mut new_variant = Condition::from_str(type_str)?;
+        match self {
+            Condition::MatchPhrase(cur_str) => new_variant.update_string(std::mem::take(cur_str)),
+            Condition::MatchRegex(cur_str) => new_variant.update_string(std::mem::take(cur_str)),
+        };
+        *self = new_variant;
+
+        Ok(())
     }
 
-    pub fn should_trigger(&self, message: &str) -> bool {
-        match &self {
-            MessageCondition::MatchPhrase(phrase) => {
-                let re = Regex::new(format!("\\b{phrase}\\b").as_str())
-                    .expect("Unable to compile regex for search phrase");
-                re.is_match(message)
+    fn validate(&self, index: Option<usize>) -> Option<SlackBlockValidationError> {
+        match self {
+            Condition::MatchPhrase(phrase) => {
+                if phrase.is_empty() {
+                    Some(SlackBlockValidationError {
+                        block_id: BlockSectionRouter::MessageConditionValueInput.to_block_id(index),
+                        error_message: "input field is empty".to_string(),
+                    })
+                } else {
+                    None
+                }
             }
-            MessageCondition::MatchRegex(reg) => {
-                let re = Regex::new(reg)
-                    .expect("Unable to compile regex for custom regex pattern search phrase");
-                re.is_match(message)
-            }
+            Condition::MatchRegex(re_str) => match Regex::new(re_str) {
+                Ok(_) => None,
+                Err(re_err) => Some(SlackBlockValidationError {
+                    block_id: BlockSectionRouter::MessageConditionValueInput.to_block_id(index),
+                    error_message: re_err.to_string(),
+                }),
+            },
         }
     }
 }

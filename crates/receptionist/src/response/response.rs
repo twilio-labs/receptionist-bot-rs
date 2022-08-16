@@ -1,7 +1,10 @@
-use crate::{
-    add_emoji_colons, BlockSectionRouter, MessageAction, ReceptionistAction, ReceptionistCondition,
-    ReceptionistListener, SlackBlockValidationError,
+use super::{
+    actions::Action,
+    conditions::Condition,
+    listeners::{ListenerEvent, ListenerEventDiscriminants},
+    traits::{ForListenerEvent, SlackEditor},
 };
+use crate::{add_emoji_colons, BlockSectionRouter, SlackBlockValidationError};
 use anyhow::{anyhow, bail, Result};
 use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
@@ -11,19 +14,20 @@ use slack_morphism::prelude::*;
 pub struct ReceptionistResponse {
     pub id: String,
     #[serde(flatten)]
-    pub listener: ReceptionistListener,
-    pub conditions: Vec<ReceptionistCondition>,
-    pub actions: Vec<ReceptionistAction>,
+    pub listener: ListenerEvent,
+    pub conditions: Vec<Condition>,
+    pub actions: Vec<Action>,
     pub collaborators: Vec<String>,
 }
 
 impl Default for ReceptionistResponse {
     fn default() -> Self {
-        let listener = ReceptionistListener::default();
+        let listener = ListenerEvent::default();
+        let listener_discrim = ListenerEventDiscriminants::from(&listener);
         Self {
             id: Self::new_id(),
-            actions: vec![ReceptionistAction::default_from_listener(&listener)],
-            conditions: vec![ReceptionistCondition::default_from_listener(&listener)],
+            actions: vec![Action::default_from_listener(&listener_discrim)],
+            conditions: vec![Condition::default_from_listener(&listener_discrim)],
             collaborators: vec![],
             listener,
         }
@@ -37,9 +41,9 @@ impl ReceptionistResponse {
 
     pub fn new(
         collaborators: Vec<String>,
-        listener: ReceptionistListener,
-        actions: Vec<ReceptionistAction>,
-        conditions: Vec<ReceptionistCondition>,
+        listener: ListenerEvent,
+        actions: Vec<Action>,
+        conditions: Vec<Condition>,
     ) -> Self {
         Self {
             id: Self::new_id(),
@@ -52,20 +56,17 @@ impl ReceptionistResponse {
 
     /// Check if any of this responses trigger conditions are met.
     /// conditions are not paired with a specific action, any trigger will fire all actions
-    pub fn check_for_match(&self, message: &str) -> bool {
-        for match_obj in &self.conditions {
-            match &match_obj {
-                ReceptionistCondition::ForMessage(msg_trigger) => {
-                    if msg_trigger.should_trigger(message) {
-                        return true;
-                    }
-                }
+    pub fn check_for_any_match(&self, message: &str) -> bool {
+        for condition in &self.conditions {
+            if condition.should_trigger(message) {
+                return true;
             }
         }
         false
     }
 
-    pub fn get_action_mut(&mut self, index: usize) -> Result<&mut ReceptionistAction> {
+    /// util to get one of this Response's actions for specified index (if it exists)
+    pub fn get_action_mut(&mut self, index: usize) -> Result<&mut Action> {
         self.actions
             .get_mut(index)
             .ok_or_else(|| anyhow!("action not found"))
@@ -105,7 +106,7 @@ impl ReceptionistResponse {
             .get_mut(index)
             .ok_or_else(|| anyhow!("condition not found"))?;
 
-        condition.update_condition_type(type_str)
+        condition.change_selection(type_str)
     }
 
     pub fn update_action_type(&mut self, type_str: &str, index: usize) -> Result<()> {
@@ -114,18 +115,17 @@ impl ReceptionistResponse {
             .get_mut(index)
             .ok_or_else(|| anyhow!("condition not found"))?;
 
-        action.update_action_type(type_str)
+        action.change_selection(type_str)
     }
 
     pub fn update_slack_channel(&mut self, conversation_id: String) -> Result<()> {
         match &self.listener {
-            ReceptionistListener::SlackChannel { .. } => {
-                self.listener = ReceptionistListener::SlackChannel {
+            ListenerEvent::SlackChannelMessage { .. } => {
+                self.listener = ListenerEvent::SlackChannelMessage {
                     channel_id: conversation_id,
                 };
                 Ok(())
             }
-            #[allow(unreachable_patterns)]
             _ => bail!("Not a slack channel listener"),
         }
     }
@@ -136,7 +136,8 @@ impl ReceptionistResponse {
             .get_mut(index)
             .ok_or_else(|| anyhow!("condition not found"))?;
 
-        condition.update_message_condition_string(new_str)
+        condition.update_string(new_str);
+        Ok(())
     }
 
     pub fn validate(&self) -> Option<Vec<SlackBlockValidationError>> {
@@ -196,32 +197,30 @@ impl ReceptionistResponse {
     /// Displays info about this entire Response on a single line in a "dropdown" selection box
     pub fn to_response_choice_item(&self) -> SlackBlockChoiceItem<SlackBlockPlainTextOnly> {
         let listener = match &self.listener {
-            ReceptionistListener::SlackChannel { channel_id } => format!("#<#{channel_id}>"),
+            ListenerEvent::SlackChannelMessage { channel_id } => format!("#<#{channel_id}>"),
         };
 
         let actions: String = self
             .actions
             .iter()
             .map(|action| match action {
-                ReceptionistAction::ForMessage(msg_act) => match msg_act {
-                    MessageAction::AttachEmoji(emoji) => add_emoji_colons(emoji),
-                    MessageAction::ThreadedMessage(msg) => msg.to_owned(),
-                    MessageAction::ChannelMessage(msg) => msg.to_owned(),
-                    MessageAction::MsgOncallInThread {
-                        escalation_policy_id,
-                        message,
-                    } => format!(
-                        "Tag Oncall: {escalation_policy_id} - {}..",
-                        message.chars().take(10).collect::<String>()
-                    ),
-                    MessageAction::ForwardMessageToChannel {
-                        channel,
-                        msg_context,
-                    } => format!(
-                        "Fwd Message: {channel} - {}..",
-                        msg_context.chars().take(10).collect::<String>()
-                    ),
-                },
+                Action::AttachEmoji(emoji) => add_emoji_colons(emoji),
+                Action::ThreadedMessage(msg) => msg.to_owned(),
+                Action::ChannelMessage(msg) => msg.to_owned(),
+                Action::MsgOncallInThread {
+                    escalation_policy_id,
+                    message,
+                } => format!(
+                    "Tag Oncall: {escalation_policy_id} - {}..",
+                    message.chars().take(10).collect::<String>()
+                ),
+                Action::ForwardMessageToChannel {
+                    channel,
+                    msg_context,
+                } => format!(
+                    "Fwd Message: {channel} - {}..",
+                    msg_context.chars().take(10).collect::<String>()
+                ),
             })
             .collect();
 
@@ -234,14 +233,12 @@ impl ReceptionistResponse {
 pub fn mock_receptionist_response() -> ReceptionistResponse {
     ReceptionistResponse::new(
         vec!["some_slack_id".into()],
-        ReceptionistListener::SlackChannel {
+        ListenerEvent::SlackChannelMessage {
             channel_id: std::env::var("TEST_CHANNEL_ID")
                 .unwrap_or_else(|_err| "<no_test_channel_set>".to_string()),
         },
-        vec![ReceptionistAction::ForMessage(MessageAction::AttachEmoji(
-            "thumbsup".to_string(),
-        ))],
-        vec![ReceptionistCondition::message_phrase("rust")],
+        vec![Action::AttachEmoji("thumbsup".to_string())],
+        vec![Condition::MatchPhrase("rust".into())],
     )
 }
 

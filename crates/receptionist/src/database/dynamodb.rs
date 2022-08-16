@@ -1,5 +1,5 @@
 use crate::config::get_or_init_app_config;
-use crate::response2::{ListenerEvent, ReceptionistResponse};
+use crate::response::{ListenerEvent, ReceptionistResponse};
 use anyhow::{anyhow, bail, Result};
 use aws_sdk_dynamodb::model::{
     AttributeValue, DeleteRequest, KeysAndAttributes, PutRequest, WriteRequest,
@@ -402,7 +402,7 @@ impl TryInto<ListenerEvent> for ListenerPKey {
 mod test {
 
     use super::convert_response_to_table_items;
-    use crate::response2::mock_receptionist_response;
+    use crate::response::mock_receptionist_response;
     use anyhow::Result;
 
     #[test]

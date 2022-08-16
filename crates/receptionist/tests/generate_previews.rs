@@ -1,7 +1,4 @@
-use receptionist::{
-    write_serde_struct_to_file, MessageAction, MessageCondition, ReceptionistAction,
-    ReceptionistCondition, ReceptionistResponse,
-};
+use receptionist::{write_serde_struct_to_file, Action, Condition, ReceptionistResponse};
 use serde::{Deserialize, Serialize};
 use slack_morphism::prelude::*;
 use std::path::{Path, PathBuf};
@@ -42,7 +39,7 @@ fn gen_action_attach_emoji() {
     let mut rec_response = ReceptionistResponse::default();
 
     let action = rec_response.actions.first_mut().unwrap();
-    *action = ReceptionistAction::ForMessage(MessageAction::AttachEmoji(":thumbsup:".into()));
+    *action = Action::AttachEmoji(":thumbsup:".into());
 
     write_preview_file("attach_emoji", rec_response)
 }
@@ -52,10 +49,10 @@ fn gen_action_tag_oncall() {
     let mut rec_response = ReceptionistResponse::default();
 
     let action = rec_response.actions.first_mut().unwrap();
-    *action = ReceptionistAction::ForMessage(MessageAction::MsgOncallInThread {
+    *action = Action::MsgOncallInThread {
         escalation_policy_id: "some_id".into(),
         message: "some_message".into(),
-    });
+    };
 
     write_preview_file("tag_oncall_in_thread", rec_response)
 }
@@ -65,10 +62,10 @@ fn gen_action_forward_msg_to_channel() {
     let mut rec_response = ReceptionistResponse::default();
 
     let action = rec_response.actions.first_mut().unwrap();
-    *action = ReceptionistAction::ForMessage(MessageAction::ForwardMessageToChannel {
+    *action = Action::ForwardMessageToChannel {
         channel: "".into(),
         msg_context: "some_message".into(),
-    });
+    };
 
     write_preview_file("fwd_msg_to_channel", rec_response)
 }
@@ -78,8 +75,7 @@ fn gen_condition_match_regex() {
     let mut rec_response = ReceptionistResponse::default();
 
     let condition = rec_response.conditions.first_mut().unwrap();
-    *condition =
-        ReceptionistCondition::ForMessage(MessageCondition::MatchRegex("<my_regex>".into()));
+    *condition = Condition::MatchRegex("<my_regex>".into());
 
     write_preview_file("match_regex", rec_response)
 }

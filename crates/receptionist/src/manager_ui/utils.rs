@@ -1,9 +1,9 @@
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::get_responses_for_collaborator;
 use crate::{
-    response2::{
+    response::{
         Action, Condition, ListenerEvent, ListenerEventDiscriminants,
-        ReceptionistResponse as ReceptionistResponse2,
+        ReceptionistResponse as Receptionistresponse,
     },
     BlockSectionRouter, ReceptionistResponse,
 };
@@ -18,14 +18,14 @@ use strum::{Display, EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
 pub struct MetaForManagerView {
     pub user_id: String,
     pub current_mode: ManagerViewModes,
-    pub response: Option<ReceptionistResponse2>,
+    pub response: Option<Receptionistresponse>,
 }
 
 impl MetaForManagerView {
     pub fn new(current_mode: ManagerViewModes, user_id: String) -> Self {
         let response = match current_mode {
             ManagerViewModes::Home => None,
-            ManagerViewModes::CreateResponse => Some(ReceptionistResponse2::default()),
+            ManagerViewModes::CreateResponse => Some(Receptionistresponse::default()),
             ManagerViewModes::EditResponse => None,
             ManagerViewModes::DeleteResponse => None,
         };

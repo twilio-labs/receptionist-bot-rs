@@ -3,7 +3,7 @@ use super::BlockSectionRouter;
 use crate::database::get_response_by_id;
 use crate::{
     manager_ui::{select_mode, MetaForManagerView},
-    response2::SlackEditor,
+    response::SlackEditor,
     SlackStateWorkaround,
 };
 use anyhow::{anyhow, bail, Context, Result};

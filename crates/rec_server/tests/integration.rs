@@ -3,7 +3,7 @@ use axum::http::Uri;
 use receptionist::{
     cloudformation::deploy_mock_receptionist_stack, config::ReceptionistAppConfig, create_response,
     delete_response, get_or_init_dynamo_client, get_response_by_id, get_responses_for_collaborator,
-    get_responses_for_listener, mock_receptionist_response2, wait_for_table, TABLE_NAME,
+    get_responses_for_listener, mock_receptionist_response, wait_for_table, TABLE_NAME,
 };
 
 use std::{
@@ -188,9 +188,9 @@ async fn tester_2_electric_boogaloo() {
 
     wait_for_table("table_name", &uri.to_string()).await;
 
-    let mock_1 = mock_receptionist_response2();
-    let mock_2 = mock_receptionist_response2();
-    let mock_3 = mock_receptionist_response2();
+    let mock_1 = mock_receptionist_response();
+    let mock_2 = mock_receptionist_response();
+    let mock_3 = mock_receptionist_response();
 
     create_response(mock_1.clone()).await.unwrap();
     create_response(mock_2.clone()).await.unwrap();

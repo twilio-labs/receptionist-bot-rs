@@ -3,12 +3,11 @@ use super::BlockSectionRouter;
 use crate::database::{create_response, delete_response, update_response};
 use crate::{
     manager_ui::MetaForManagerView,
-    response2::{
+    response::{
         Action, Condition, ListenerEvent, ListenerEventDiscriminants,
-        ReceptionistResponse as ReceptionistResponse2,
+        ReceptionistResponse as Receptionistresponse,
     },
-    ManagerViewModes, MessageAction, ReceptionistAction, ReceptionistResponse, SlackResponseAction,
-    ViewBlockStateType,
+    ManagerViewModes, ReceptionistResponse, SlackResponseAction, ViewBlockStateType,
 };
 
 use anyhow::{anyhow, bail, Context, Result};
@@ -112,7 +111,7 @@ fn extract_action_block_states(
 pub struct ParsedManagerViewSubmission {
     pub mode: ManagerViewModes,
     pub selected_response_id: Option<String>,
-    pub response: ReceptionistResponse2,
+    pub response: Receptionistresponse,
 }
 
 fn parse_manager_block_states(

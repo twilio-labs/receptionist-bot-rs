@@ -1,18 +1,17 @@
 use super::SlackStateWorkaround;
-use crate::response2::ForListenerEvent;
+use crate::response::ForListenerEvent;
 
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::get_responses_for_listener;
 use crate::{
     config::get_or_init_app_config,
     format_forwarded_message, get_sender,
-    response::{MessageAction, ReceptionistAction, ReceptionistCondition, ReceptionistResponse},
-    response2::{
+    response::{
         Action, Condition, ListenerEvent, ListenerEventDiscriminants,
-        ReceptionistResponse as ReceptionistResponse2,
+        ReceptionistResponse as Receptionistresponse,
     },
     slack::api_calls::reactions_add,
-    MessageHelpers, ReceptionistListener,
+    MessageHelpers,
 };
 use axum::{extract::Extension, http::StatusCode, response::IntoResponse, Json};
 use serde_json::{to_value, Value};
@@ -79,7 +78,7 @@ pub async fn process_event_callback_for_receptionist(
                 .await
                 .expect("unable to get responses for channel");
 
-            let responses_for_message_type: Vec<ReceptionistResponse2> = responses_for_channel_id
+            let responses_for_message_type: Vec<Receptionistresponse> = responses_for_channel_id
                 .iter()
                 .filter(|r| {
                     r.conditions

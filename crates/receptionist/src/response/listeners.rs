@@ -1,34 +1,34 @@
-use crate::{BlockSectionRouter, SlackBlockValidationError};
+use crate::{BlockSectionRouter, EnumUtils, SlackBlockValidationError};
 use serde::{Deserialize, Serialize};
 use slack_morphism::prelude::*;
 use strum::{EnumIter, EnumString};
 
-#[derive(Debug, Serialize, Deserialize, EnumString, PartialEq, EnumIter, Clone, strum::Display)]
+#[derive(EnumUtils!, Serialize, Deserialize, EnumString, Clone)]
 #[serde(tag = "listener_type", rename_all = "snake_case")]
 #[strum(serialize_all = "kebab_case")]
-pub enum ReceptionistListener {
-    SlackChannel { channel_id: String },
-    // SlackCommandKeyword { command: String, keyword: String },
+pub enum ListenerEvent {
+    SlackChannelMessage { channel_id: String },
+    // SlackSlashCommand,
 }
 
-impl Default for ReceptionistListener {
+impl Default for ListenerEvent {
     fn default() -> Self {
-        Self::SlackChannel {
+        Self::SlackChannelMessage {
             channel_id: "".into(),
         }
     }
 }
 
-impl ReceptionistListener {
+impl ListenerEvent {
     pub fn matches_slack_channel_id(&self, incoming_channel: &str) -> bool {
         match self {
-            ReceptionistListener::SlackChannel { channel_id } => channel_id == incoming_channel,
+            ListenerEvent::SlackChannelMessage { channel_id } => channel_id == incoming_channel,
         }
     }
 
     pub fn validate(&self) -> Option<SlackBlockValidationError> {
         match self {
-            ReceptionistListener::SlackChannel { channel_id } => {
+            ListenerEvent::SlackChannelMessage { channel_id } => {
                 if channel_id.is_empty() {
                     Some(SlackBlockValidationError {
                         block_id: BlockSectionRouter::ListenerChannelSelected.to_block_id(None),
@@ -60,7 +60,7 @@ impl ReceptionistListener {
 
     pub fn to_editor_blocks(&self) -> Vec<SlackBlock> {
         match self {
-            ReceptionistListener::SlackChannel { channel_id } => {
+            ListenerEvent::SlackChannelMessage { channel_id } => {
                 let conversations_select_element = SlackBlockConversationsSelectElement::new(
                     BlockSectionRouter::ListenerChannelSelected.to_action_id(None),
                     pt!("#my-channel"),
