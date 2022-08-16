@@ -24,7 +24,6 @@ pub fn setup_cf_client(
             Endpoint::immutable(url_override_string.parse().expect("Failed to parse URI"));
         new_config = new_config.endpoint_resolver(url_override);
     };
-    // let credentials = Credentials::new("test", "test", None, None, "yaboy");
 
     Client::from_conf(new_config.build())
 }

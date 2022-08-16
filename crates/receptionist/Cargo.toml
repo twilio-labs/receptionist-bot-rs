@@ -53,3 +53,4 @@ arguably = "2.0"
 
 derive-alias = "0.1.0"
 macro_rules_attribute = "0.1.2"
+async-trait = "0.1.57"

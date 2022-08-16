@@ -1,18 +1,17 @@
-use crate::config::get_or_init_app_config;
-use crate::response::{ListenerEvent, ReceptionistResponse};
-use anyhow::{anyhow, bail, Result};
-use aws_sdk_dynamodb::model::{
-    AttributeValue, DeleteRequest, KeysAndAttributes, PutRequest, WriteRequest,
+use crate::{
+    config::get_or_init_app_config,
+    response::{ListenerEvent, ReceptionistResponse},
 };
-use aws_sdk_dynamodb::output::BatchWriteItemOutput;
-use aws_sdk_dynamodb::{Client, Config, Endpoint, Region};
+use anyhow::{anyhow, bail, Result};
+use aws_sdk_dynamodb::{
+    model::{AttributeValue, DeleteRequest, KeysAndAttributes, PutRequest, WriteRequest},
+    output::BatchWriteItemOutput,
+    Client, Config, Endpoint, Region,
+};
 use aws_types::Credentials;
 use serde::{Deserialize, Serialize};
 use serde_dynamo::aws_sdk_dynamodb_0_4::{from_item, from_items, to_attribute_value, to_item};
-use std::collections::HashMap;
-use std::fmt::Display;
-use std::str::FromStr;
-use std::time::Duration;
+use std::{collections::HashMap, fmt::Display, str::FromStr, time::Duration};
 use tokio::sync::OnceCell;
 // Starter examples: https://github.com/awslabs/aws-sdk-rust/tree/main/examples/dynamodb/src/bin
 

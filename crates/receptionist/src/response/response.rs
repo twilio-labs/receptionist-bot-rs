@@ -89,8 +89,6 @@ impl ReceptionistResponse {
             .flat_map(|(index, action)| action.to_editor_blocks(Some(index)))
             .collect();
 
-        // TODO collaborator blocks
-
         [
             self.build_collaborators_editor_blocks(),
             listener_blocks,

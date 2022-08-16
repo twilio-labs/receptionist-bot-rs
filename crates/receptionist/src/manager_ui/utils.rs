@@ -1,31 +1,25 @@
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::get_responses_for_collaborator;
-use crate::{
-    response::{
-        Action, Condition, ListenerEvent, ListenerEventDiscriminants,
-        ReceptionistResponse as Receptionistresponse,
-    },
-    BlockSectionRouter, ReceptionistResponse,
-};
+use crate::{BlockSectionRouter, EnumUtils, ReceptionistResponse};
 use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use slack_morphism::prelude::*;
 use std::str::FromStr;
-use strum::{Display, EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
+use strum::{EnumString, IntoEnumIterator};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct MetaForManagerView {
     pub user_id: String,
     pub current_mode: ManagerViewModes,
-    pub response: Option<Receptionistresponse>,
+    pub response: Option<ReceptionistResponse>,
 }
 
 impl MetaForManagerView {
     pub fn new(current_mode: ManagerViewModes, user_id: String) -> Self {
         let response = match current_mode {
             ManagerViewModes::Home => None,
-            ManagerViewModes::CreateResponse => Some(Receptionistresponse::default()),
+            ManagerViewModes::CreateResponse => Some(ReceptionistResponse::default()),
             ManagerViewModes::EditResponse => None,
             ManagerViewModes::DeleteResponse => None,
         };
@@ -130,18 +124,7 @@ async fn response_selector_blocks(user_id: &str) -> Vec<SlackBlock> {
     ]
 }
 
-#[derive(
-    EnumDiscriminants,
-    EnumIter,
-    Display,
-    EnumString,
-    PartialEq,
-    Debug,
-    Serialize,
-    Deserialize,
-    Clone,
-)]
-#[strum_discriminants(derive(EnumIter))]
+#[derive(EnumUtils!, EnumString, Serialize, Deserialize, Clone)]
 #[strum(serialize_all = "kebab_case")]
 pub enum ManagerViewModes {
     Home,

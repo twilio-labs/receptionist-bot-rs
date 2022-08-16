@@ -1,4 +1,5 @@
 pub mod cloudformation;
+pub mod traits;
 
 #[cfg(feature = "dynamodb")]
 mod dynamodb;

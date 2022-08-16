@@ -1,7 +1,7 @@
 use crate::{BlockSectionRouter, EnumUtils, SlackBlockValidationError};
 use serde::{Deserialize, Serialize};
 use slack_morphism::prelude::*;
-use strum::{EnumIter, EnumString};
+use strum::EnumString;
 
 #[derive(EnumUtils!, Serialize, Deserialize, EnumString, Clone)]
 #[serde(tag = "listener_type", rename_all = "snake_case")]

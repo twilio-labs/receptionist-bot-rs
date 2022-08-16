@@ -2,14 +2,9 @@ use super::BlockSectionRouter;
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::{create_response, delete_response, update_response};
 use crate::{
-    manager_ui::MetaForManagerView,
-    response::{
-        Action, Condition, ListenerEvent, ListenerEventDiscriminants,
-        ReceptionistResponse as Receptionistresponse,
-    },
-    ManagerViewModes, ReceptionistResponse, SlackResponseAction, ViewBlockStateType,
+    manager_ui::MetaForManagerView, response::Action, ManagerViewModes, ReceptionistResponse,
+    SlackResponseAction, ViewBlockStateType,
 };
-
 use anyhow::{anyhow, bail, Context, Result};
 use serde_json::{from_str, from_value};
 use slack_morphism::prelude::*;
@@ -111,7 +106,7 @@ fn extract_action_block_states(
 pub struct ParsedManagerViewSubmission {
     pub mode: ManagerViewModes,
     pub selected_response_id: Option<String>,
-    pub response: Receptionistresponse,
+    pub response: ReceptionistResponse,
 }
 
 fn parse_manager_block_states(

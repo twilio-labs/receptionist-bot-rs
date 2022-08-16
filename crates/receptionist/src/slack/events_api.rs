@@ -7,7 +7,7 @@ use crate::{
     config::get_or_init_app_config,
     format_forwarded_message, get_sender,
     response::{
-        Action, Condition, ListenerEvent, ListenerEventDiscriminants,
+        Action, ListenerEvent, ListenerEventDiscriminants,
         ReceptionistResponse as Receptionistresponse,
     },
     slack::api_calls::reactions_add,
