@@ -5,6 +5,7 @@ use crate::{
     manager_ui::MetaForManagerView, ManagerViewModes, MessageAction, ReceptionistAction,
     ReceptionistResponse, SlackResponseAction, ViewBlockStateType,
 };
+
 use anyhow::{anyhow, bail, Context, Result};
 use serde_json::{from_str, from_value};
 use slack_morphism::prelude::*;
@@ -166,7 +167,7 @@ fn parse_manager_block_states(
                             MessageAction::AttachEmoji(_) => {
                                 MessageAction::AttachEmoji(block_state.get_plain_text_value()?)
                             }
-                            _ => bail!("wrong action type for emoji input"),
+                            _ => bail!("wrong action type for emoji input: {}", msg_action),
                         };
                     }
                 }

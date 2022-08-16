@@ -6,6 +6,10 @@ compile_error!("cannot enable multiple db features");
 #[macro_use]
 extern crate macro_rules_attribute;
 
+derive_alias! {
+    #[derive(EnumUtils!)] = #[derive(strum::Display, strum::EnumDiscriminants, strum::EnumIter, Debug, PartialEq)];
+}
+
 pub mod config;
 mod database;
 mod manager_ui;
