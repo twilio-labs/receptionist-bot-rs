@@ -1,6 +1,12 @@
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::get_responses_for_collaborator;
-use crate::{BlockSectionRouter, ReceptionistResponse};
+use crate::{
+    response2::{
+        Action, Condition, ListenerEvent, ListenerEventDiscriminants,
+        ReceptionistResponse as ReceptionistResponse2,
+    },
+    BlockSectionRouter, ReceptionistResponse,
+};
 use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
@@ -12,14 +18,14 @@ use strum::{Display, EnumDiscriminants, EnumIter, EnumString, IntoEnumIterator};
 pub struct MetaForManagerView {
     pub user_id: String,
     pub current_mode: ManagerViewModes,
-    pub response: Option<ReceptionistResponse>,
+    pub response: Option<ReceptionistResponse2>,
 }
 
 impl MetaForManagerView {
     pub fn new(current_mode: ManagerViewModes, user_id: String) -> Self {
         let response = match current_mode {
             ManagerViewModes::Home => None,
-            ManagerViewModes::CreateResponse => Some(ReceptionistResponse::default()),
+            ManagerViewModes::CreateResponse => Some(ReceptionistResponse2::default()),
             ManagerViewModes::EditResponse => None,
             ManagerViewModes::DeleteResponse => None,
         };

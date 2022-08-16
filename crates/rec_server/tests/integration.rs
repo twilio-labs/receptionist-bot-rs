@@ -1,23 +1,19 @@
 use anyhow::{bail, Result};
 use axum::http::Uri;
-use receptionist::cloudformation::deploy_mock_receptionist_stack;
-use receptionist::config::ReceptionistAppConfig;
 use receptionist::{
-    create_response, delete_response, get_response_by_id, get_responses_for_collaborator,
-};
-use receptionist::{
-    get_or_init_dynamo_client, get_responses_for_listener, mock_receptionist_response,
-    wait_for_table, TABLE_NAME,
+    cloudformation::deploy_mock_receptionist_stack, config::ReceptionistAppConfig, create_response,
+    delete_response, get_or_init_dynamo_client, get_response_by_id, get_responses_for_collaborator,
+    get_responses_for_listener, mock_receptionist_response2, wait_for_table, TABLE_NAME,
 };
 
-use std::collections::HashMap;
-use std::env;
-use std::process::{Child, Command};
-use std::thread::sleep;
-use std::time::Duration;
-use testcontainers::clients::Cli;
-use testcontainers::core::WaitFor;
-use testcontainers::{Image, ImageArgs};
+use std::{
+    collections::HashMap,
+    env,
+    process::{Child, Command},
+    thread::sleep,
+    time::Duration,
+};
+use testcontainers::{clients::Cli, core::WaitFor, Image, ImageArgs};
 
 struct LocalstackDynamo {
     env_vars: HashMap<String, String>,
@@ -192,9 +188,9 @@ async fn tester_2_electric_boogaloo() {
 
     wait_for_table("table_name", &uri.to_string()).await;
 
-    let mock_1 = mock_receptionist_response();
-    let mock_2 = mock_receptionist_response();
-    let mock_3 = mock_receptionist_response();
+    let mock_1 = mock_receptionist_response2();
+    let mock_2 = mock_receptionist_response2();
+    let mock_3 = mock_receptionist_response2();
 
     create_response(mock_1.clone()).await.unwrap();
     create_response(mock_2.clone()).await.unwrap();

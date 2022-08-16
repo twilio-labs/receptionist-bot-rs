@@ -1,4 +1,5 @@
 use super::SlackStateWorkaround;
+use crate::response2::ForListenerEvent;
 
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::get_responses_for_listener;
@@ -6,6 +7,10 @@ use crate::{
     config::get_or_init_app_config,
     format_forwarded_message, get_sender,
     response::{MessageAction, ReceptionistAction, ReceptionistCondition, ReceptionistResponse},
+    response2::{
+        Action, Condition, ListenerEvent, ListenerEventDiscriminants,
+        ReceptionistResponse as ReceptionistResponse2,
+    },
     slack::api_calls::reactions_add,
     MessageHelpers, ReceptionistListener,
 };
@@ -45,7 +50,6 @@ pub async fn handle_slack_event(
 
 pub async fn process_event_callback_for_receptionist(
     event_req: SlackPushEventCallback,
-    // slack_client: Arc<SlackStateWorkaround>,
     slack_client: &SlackStateWorkaround,
 ) -> Value {
     let default_event_response = Value::default();
@@ -69,18 +73,23 @@ pub async fn process_event_callback_for_receptionist(
                 .unwrap_or_else(|| SlackChannelId("".to_string()));
 
             let responses_for_channel_id =
-                get_responses_for_listener(ReceptionistListener::SlackChannel {
+                get_responses_for_listener(ListenerEvent::SlackChannelMessage {
                     channel_id: event_channel_id.to_string(),
                 })
                 .await
                 .expect("unable to get responses for channel");
 
-            let responses_for_message_type: Vec<ReceptionistResponse> = responses_for_channel_id
+            let responses_for_message_type: Vec<ReceptionistResponse2> = responses_for_channel_id
                 .iter()
                 .filter(|r| {
                     r.conditions
                         .iter()
-                        .any(|t_type| matches!(&t_type, &ReceptionistCondition::ForMessage(_)))
+                        // .any(|t_type| matches!(&t_type, &ReceptionistCondition::ForMessage(_)))
+                        .any(|t_type| {
+                            t_type
+                                .listeners()
+                                .contains(&ListenerEventDiscriminants::SlackChannelMessage)
+                        })
                 })
                 .map(|r| r.to_owned())
                 .collect();
@@ -88,59 +97,53 @@ pub async fn process_event_callback_for_receptionist(
             let slack_session = slack_client.open_session();
 
             for rec_response in responses_for_message_type {
-                if rec_response.check_for_match(&message_content) {
+                if rec_response.check_for_any_match(&message_content) {
                     for action in &rec_response.actions {
                         match &action {
-                            ReceptionistAction::ForMessage(message_action) => {
-                                match message_action {
-                                    MessageAction::AttachEmoji(name) => {
-                                        if let Err(slack_err) = reactions_add(
-                                            &slack_session,
-                                            &event_channel_id.to_string(),
-                                            event.origin.ts.as_ref(),
-                                            name,
+                            Action::AttachEmoji(name) => {
+                                if let Err(slack_err) = reactions_add(
+                                    &slack_session,
+                                    &event_channel_id.to_string(),
+                                    event.origin.ts.as_ref(),
+                                    name,
+                                )
+                                .await
+                                {
+                                    // log error
+                                    error!("{}", slack_err);
+                                }
+                            }
+                            Action::ThreadedMessage(msg) => {
+                                if let Err(slack_err) = slack_session
+                                    .chat_post_message(
+                                        &SlackApiChatPostMessageRequest::new(
+                                            event_channel_id.to_owned(),
+                                            SlackMessageContent::new().with_text(msg.to_owned()),
                                         )
-                                        .await
-                                        {
-                                            // log error
-                                            error!("{}", slack_err);
-                                        }
-                                    }
-                                    MessageAction::ThreadedMessage(msg) => {
-                                        if let Err(slack_err) = slack_session
-                                            .chat_post_message(
-                                                &SlackApiChatPostMessageRequest::new(
-                                                    event_channel_id.to_owned(),
-                                                    SlackMessageContent::new()
-                                                        .with_text(msg.to_owned()),
-                                                )
-                                                .with_thread_ts(event.origin.ts.to_owned()),
-                                            )
-                                            .await
-                                        {
-                                            error!("{}", slack_err);
-                                        }
-                                    }
-                                    MessageAction::ChannelMessage(msg) => {
-                                        if let Err(slack_err) = slack_session
-                                            .chat_post_message(
-                                                &SlackApiChatPostMessageRequest::new(
-                                                    event_channel_id.to_owned(),
-                                                    SlackMessageContent::new()
-                                                        .with_text(msg.to_owned()),
-                                                ),
-                                            )
-                                            .await
-                                        {
-                                            error!("{}", slack_err);
-                                        }
-                                    }
-                                    MessageAction::MsgOncallInThread {
-                                        escalation_policy_id,
-                                        message,
-                                    } => {
-                                        // get oncall user
-                                        match &get_or_init_app_config().await.pagerduty_config {
+                                        .with_thread_ts(event.origin.ts.to_owned()),
+                                    )
+                                    .await
+                                {
+                                    error!("{}", slack_err);
+                                }
+                            }
+                            Action::ChannelMessage(msg) => {
+                                if let Err(slack_err) = slack_session
+                                    .chat_post_message(&SlackApiChatPostMessageRequest::new(
+                                        event_channel_id.to_owned(),
+                                        SlackMessageContent::new().with_text(msg.to_owned()),
+                                    ))
+                                    .await
+                                {
+                                    error!("{}", slack_err);
+                                }
+                            }
+                            Action::MsgOncallInThread {
+                                escalation_policy_id,
+                                message,
+                            } => {
+                                // get oncall user
+                                match &get_or_init_app_config().await.pagerduty_config {
                                             Some(pd) => {
                                                 match  pd.get_oncalls(escalation_policy_id.to_owned()).await {
                                                     Ok(oncalls_list) => {
@@ -171,52 +174,45 @@ pub async fn process_event_callback_for_receptionist(
                                             },
                                             None => error!("No pagerduty token configured, unable to tag user in thread"),
                                         }
-                                    }
-                                    MessageAction::ForwardMessageToChannel {
-                                        channel,
-                                        msg_context,
-                                    } => {
-                                        match slack_session
-                                            .chat_get_permalink(
-                                                &SlackApiChatGetPermalinkRequest::new(
-                                                    event_channel_id.to_owned(),
-                                                    event.origin.ts.to_owned(),
+                            }
+                            Action::ForwardMessageToChannel {
+                                channel,
+                                msg_context,
+                            } => {
+                                match slack_session
+                                    .chat_get_permalink(&SlackApiChatGetPermalinkRequest::new(
+                                        event_channel_id.to_owned(),
+                                        event.origin.ts.to_owned(),
+                                    ))
+                                    .await
+                                {
+                                    Ok(permalink_resp) => {
+                                        let permalink = permalink_resp.permalink;
+                                        let sender = get_sender(&event.sender);
+                                        if let Err(slack_err) = slack_session
+                                            .chat_post_message(
+                                                &SlackApiChatPostMessageRequest::new(
+                                                    channel.into(),
+                                                    SlackMessageContent::new().with_text(
+                                                        format_forwarded_message(
+                                                            event_channel_id.as_ref(),
+                                                            &sender,
+                                                            &permalink.to_string(),
+                                                            msg_context,
+                                                        ),
+                                                    ),
                                                 ),
                                             )
                                             .await
                                         {
-                                            Ok(permalink_resp) => {
-                                                let permalink = permalink_resp.permalink;
-                                                let sender = get_sender(&event.sender);
-                                                if let Err(slack_err) = slack_session
-                                                    .chat_post_message(
-                                                        &SlackApiChatPostMessageRequest::new(
-                                                            channel.into(),
-                                                            SlackMessageContent::new().with_text(
-                                                                format_forwarded_message(
-                                                                    event_channel_id.as_ref(),
-                                                                    &sender,
-                                                                    &permalink.to_string(),
-                                                                    msg_context,
-                                                                ),
-                                                            ),
-                                                        ),
-                                                    )
-                                                    .await
-                                                {
-                                                    error!(
-                                                        "Failed to forward message {}",
-                                                        slack_err
-                                                    );
-                                                }
-                                            }
-                                            Err(slack_err) => error!(
-                                                "Failed to get permalink to forward message: {}",
-                                                slack_err
-                                            ),
-                                        };
+                                            error!("Failed to forward message {}", slack_err);
+                                        }
                                     }
-                                }
+                                    Err(slack_err) => error!(
+                                        "Failed to get permalink to forward message: {}",
+                                        slack_err
+                                    ),
+                                };
                             }
                         };
                     }

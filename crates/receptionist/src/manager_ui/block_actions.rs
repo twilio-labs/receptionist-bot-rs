@@ -3,6 +3,7 @@ use super::BlockSectionRouter;
 use crate::database::get_response_by_id;
 use crate::{
     manager_ui::{select_mode, MetaForManagerView},
+    response2::SlackEditor,
     SlackStateWorkaround,
 };
 use anyhow::{anyhow, bail, Context, Result};
@@ -95,7 +96,7 @@ pub async fn process_action_event(
                             .get_mut(index_result?)
                             .ok_or_else(|| anyhow!("action not found"))?;
 
-                        rec_action.update_action_type_from_action_info(action)?;
+                        rec_action.change_selection_from_action_info(action)?;
                         private_metadata.response = Some(response);
 
                         slack

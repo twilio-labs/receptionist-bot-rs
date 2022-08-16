@@ -1,6 +1,5 @@
 use crate::config::get_or_init_app_config;
-use crate::ReceptionistListener;
-use crate::ReceptionistResponse;
+use crate::response2::{ListenerEvent, ReceptionistResponse};
 use anyhow::{anyhow, bail, Result};
 use aws_sdk_dynamodb::model::{
     AttributeValue, DeleteRequest, KeysAndAttributes, PutRequest, WriteRequest,
@@ -95,7 +94,7 @@ pub async fn create_response(rec_response: ReceptionistResponse) -> Result<Batch
 }
 
 pub async fn get_responses_for_listener(
-    listener: ReceptionistListener,
+    listener: ListenerEvent,
 ) -> Result<Vec<ReceptionistResponse>> {
     let client = get_or_init_dynamo_client().await;
 
@@ -368,10 +367,10 @@ impl Display for ListenerPKey {
     }
 }
 
-impl From<ReceptionistListener> for ListenerPKey {
-    fn from(listener: ReceptionistListener) -> Self {
+impl From<ListenerEvent> for ListenerPKey {
+    fn from(listener: ListenerEvent) -> Self {
         let pk = match listener.clone() {
-            ReceptionistListener::SlackChannel { channel_id } => {
+            ListenerEvent::SlackChannelMessage { channel_id } => {
                 format!("{}/{}", listener, channel_id)
             }
         };
@@ -380,19 +379,19 @@ impl From<ReceptionistListener> for ListenerPKey {
     }
 }
 
-impl TryInto<ReceptionistListener> for ListenerPKey {
+impl TryInto<ListenerEvent> for ListenerPKey {
     type Error = anyhow::Error;
 
-    fn try_into(self) -> Result<ReceptionistListener> {
+    fn try_into(self) -> Result<ListenerEvent> {
         let (listener_type, value) = self
             .0
             .split_once("/")
             .ok_or_else(|| anyhow!("Unable to find PKey delimiter"))?;
 
-        let listener = ReceptionistListener::from_str(listener_type)?;
+        let listener = ListenerEvent::from_str(listener_type)?;
 
         match listener {
-            ReceptionistListener::SlackChannel { .. } => Ok(ReceptionistListener::SlackChannel {
+            ListenerEvent::SlackChannelMessage { .. } => Ok(ListenerEvent::SlackChannelMessage {
                 channel_id: value.into(),
             }),
         }
@@ -403,7 +402,7 @@ impl TryInto<ReceptionistListener> for ListenerPKey {
 mod test {
 
     use super::convert_response_to_table_items;
-    use crate::mock_receptionist_response;
+    use crate::response2::mock_receptionist_response;
     use anyhow::Result;
 
     #[test]

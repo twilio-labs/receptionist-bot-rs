@@ -2,8 +2,13 @@ use super::BlockSectionRouter;
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::{create_response, delete_response, update_response};
 use crate::{
-    manager_ui::MetaForManagerView, ManagerViewModes, MessageAction, ReceptionistAction,
-    ReceptionistResponse, SlackResponseAction, ViewBlockStateType,
+    manager_ui::MetaForManagerView,
+    response2::{
+        Action, Condition, ListenerEvent, ListenerEventDiscriminants,
+        ReceptionistResponse as ReceptionistResponse2,
+    },
+    ManagerViewModes, MessageAction, ReceptionistAction, ReceptionistResponse, SlackResponseAction,
+    ViewBlockStateType,
 };
 
 use anyhow::{anyhow, bail, Context, Result};
@@ -107,7 +112,7 @@ fn extract_action_block_states(
 pub struct ParsedManagerViewSubmission {
     pub mode: ManagerViewModes,
     pub selected_response_id: Option<String>,
-    pub response: ReceptionistResponse,
+    pub response: ReceptionistResponse2,
 }
 
 fn parse_manager_block_states(
@@ -161,15 +166,11 @@ fn parse_manager_block_states(
             BlockSectionRouter::AttachEmojiInput => {
                 let action = parsed_submission.response.get_action_mut(index_result?)?;
 
-                match action {
-                    ReceptionistAction::ForMessage(msg_action) => {
-                        *msg_action = match msg_action {
-                            MessageAction::AttachEmoji(_) => {
-                                MessageAction::AttachEmoji(block_state.get_plain_text_value()?)
-                            }
-                            _ => bail!("wrong action type for emoji input: {}", msg_action),
-                        };
+                *action = match action {
+                    Action::AttachEmoji(_) => {
+                        Action::AttachEmoji(block_state.get_plain_text_value()?)
                     }
+                    _ => bail!("wrong action type for emoji input: {}", action),
                 }
             }
 
@@ -187,87 +188,63 @@ fn parse_manager_block_states(
             BlockSectionRouter::ReplyThreadedMsgInput => {
                 let action = parsed_submission.response.get_action_mut(index_result?)?;
 
-                match action {
-                    ReceptionistAction::ForMessage(msg_action) => {
-                        *msg_action = match msg_action {
-                            MessageAction::ThreadedMessage(_) => {
-                                MessageAction::ThreadedMessage(block_state.get_plain_text_value()?)
-                            }
-                            _ => bail!("wrong action type for emoji input"),
-                        };
+                *action = match action {
+                    Action::ThreadedMessage(_) => {
+                        Action::ThreadedMessage(block_state.get_plain_text_value()?)
                     }
+                    _ => bail!("wrong action type for emoji input"),
                 }
             }
             BlockSectionRouter::PostChannelMsgInput => {
                 let action = parsed_submission.response.get_action_mut(index_result?)?;
 
-                match action {
-                    ReceptionistAction::ForMessage(msg_action) => {
-                        *msg_action = match msg_action {
-                            MessageAction::ChannelMessage(_) => {
-                                MessageAction::ChannelMessage(block_state.get_plain_text_value()?)
-                            }
-                            _ => bail!("wrong action type for emoji input"),
-                        };
+                *action = match action {
+                    Action::ChannelMessage(_) => {
+                        Action::ChannelMessage(block_state.get_plain_text_value()?)
                     }
+                    _ => bail!("wrong action type for emoji input"),
                 }
             }
             BlockSectionRouter::PDEscalationPolicyInput => {
                 let action = parsed_submission.response.get_action_mut(index_result?)?;
 
-                match action {
-                    ReceptionistAction::ForMessage(msg_action) => {
-                        *msg_action = match msg_action {
-                            MessageAction::MsgOncallInThread { message, .. } => {
-                                MessageAction::MsgOncallInThread {
-                                    escalation_policy_id: block_state.get_plain_text_value()?,
-                                    message: std::mem::take(message),
-                                }
-                            }
-                            _ => bail!("wrong action type for emoji input"),
-                        };
-                    }
+                *action = match action {
+                    Action::MsgOncallInThread { message, .. } => Action::MsgOncallInThread {
+                        escalation_policy_id: block_state.get_plain_text_value()?,
+                        message: std::mem::take(message),
+                    },
+                    _ => bail!("wrong action type for emoji input"),
                 }
             }
             BlockSectionRouter::PDThreadedMsgInput => {
                 let action = parsed_submission.response.get_action_mut(index_result?)?;
 
-                match action {
-                    ReceptionistAction::ForMessage(msg_action) => {
-                        *msg_action = match msg_action {
-                            MessageAction::MsgOncallInThread {
-                                escalation_policy_id,
-                                ..
-                            } => MessageAction::MsgOncallInThread {
-                                escalation_policy_id: std::mem::take(escalation_policy_id),
-                                message: block_state.get_plain_text_value()?,
-                            },
-                            _ => bail!("wrong action type for emoji input"),
-                        };
-                    }
+                *action = match action {
+                    Action::MsgOncallInThread {
+                        escalation_policy_id,
+                        ..
+                    } => Action::MsgOncallInThread {
+                        escalation_policy_id: std::mem::take(escalation_policy_id),
+                        message: block_state.get_plain_text_value()?,
+                    },
+                    _ => bail!("wrong action type for emoji input"),
                 }
             }
             BlockSectionRouter::FwdMsgToChanChannelInput => {
                 let action = parsed_submission.response.get_action_mut(index_result?)?;
 
-                match action {
-                    ReceptionistAction::ForMessage(msg_action) => {
-                        *msg_action = match msg_action {
-                            MessageAction::ForwardMessageToChannel { msg_context, .. } => {
-                                if let Some(channel_id) =
-                                    block_state.get_conversation_select_value()?
-                                {
-                                    MessageAction::ForwardMessageToChannel {
-                                        channel: channel_id.to_string(),
-                                        msg_context: std::mem::take(msg_context),
-                                    }
-                                } else {
-                                    bail!("No channel_id provided in channel update event")
-                                }
+                *action = match action {
+                    Action::ForwardMessageToChannel { msg_context, .. } => {
+                        if let Some(channel_id) = block_state.get_conversation_select_value()? {
+                            Action::ForwardMessageToChannel {
+                                channel: channel_id.to_string(),
+                                msg_context: std::mem::take(msg_context),
                             }
-                            _ => bail!("wrong action type for Forward Message - Channel Input"),
-                        };
+                        } else {
+                            bail!("No channel_id provided in channel update event")
+                        }
                     }
+                    _ => bail!("wrong action type for Forward Message - Channel Input"),
                 }
             }
             BlockSectionRouter::FwdMsgToChanMsgContextInput => todo!(),
