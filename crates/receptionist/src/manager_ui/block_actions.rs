@@ -1,10 +1,9 @@
-use super::BlockSectionRouter;
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::get_response_by_id;
 use crate::{
     manager_ui::{select_mode, MetaForManagerView},
     response::SlackEditor,
-    SlackStateWorkaround,
+    BlockSectionRouter, SlackStateWorkaround,
 };
 use anyhow::{anyhow, bail, Context, Result};
 use slack_morphism::prelude::*;
@@ -61,8 +60,7 @@ pub async fn process_action_event(
                             .selected_option
                             .ok_or_else(|| anyhow!("No selection for response"))?;
 
-                        private_metadata.response =
-                            Some(get_response_by_id(&selected_item.value).await?);
+                        private_metadata.existing_response_id = Some(selected_item.value);
 
                         slack
                             .update_manager_modal_view(view_id.to_owned(), &private_metadata)

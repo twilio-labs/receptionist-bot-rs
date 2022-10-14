@@ -1,9 +1,8 @@
-use super::BlockSectionRouter;
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::{create_response, delete_response, update_response};
 use crate::{
-    manager_ui::MetaForManagerView, response::Action, ManagerViewModes, ReceptionistResponse,
-    SlackResponseAction, ViewBlockStateType,
+    manager_ui::MetaForManagerView, response::Action, BlockSectionRouter, ManagerViewMode,
+    ReceptionistResponse, SlackResponseAction, ViewBlockStateType,
 };
 use anyhow::{anyhow, bail, Context, Result};
 use serde_json::{from_str, from_value};
@@ -41,8 +40,8 @@ pub async fn process_submission_event(
                 parse_manager_block_states(&block_id_map, private_metadata, &user_id)?;
 
             return match parsed_view.mode {
-                ManagerViewModes::Home => Ok(None),
-                ManagerViewModes::CreateResponse => {
+                ManagerViewMode::Home => Ok(None),
+                ManagerViewMode::CreateResponse => {
                     // get response info from view states
                     match parsed_view.response.validate() {
                         Some(validation_errors) => Ok(Some(
@@ -54,7 +53,7 @@ pub async fn process_submission_event(
                         }
                     }
                 }
-                ManagerViewModes::EditResponse => {
+                ManagerViewMode::EditResponse => {
                     // get response_id from selector
                     match parsed_view.response.validate() {
                         Some(validation_errors) => Ok(Some(
@@ -66,7 +65,7 @@ pub async fn process_submission_event(
                         }
                     }
                 }
-                ManagerViewModes::DeleteResponse => {
+                ManagerViewMode::DeleteResponse => {
                     // get_response_id from selector
                     // delete_response(user_id, selected_response_id)
                     delete_response(parsed_view.response).await?;
@@ -104,7 +103,7 @@ fn extract_action_block_states(
 
 #[derive(Debug)]
 pub struct ParsedManagerViewSubmission {
-    pub mode: ManagerViewModes,
+    pub mode: ManagerViewMode,
     pub selected_response_id: Option<String>,
     pub response: ReceptionistResponse,
 }
@@ -121,7 +120,7 @@ fn parse_manager_block_states(
     };
 
     // exit early if home view, no saving to database
-    if matches!(parsed_submission.mode, ManagerViewModes::Home) {
+    if matches!(parsed_submission.mode, ManagerViewMode::Home) {
         info!("Home View submitted");
         return Ok(parsed_submission);
     }
@@ -133,7 +132,7 @@ fn parse_manager_block_states(
         match route {
             BlockSectionRouter::ManagerModeSelection => {
                 parsed_submission.mode =
-                    ManagerViewModes::from_str(&block_state.get_value_from_static_select()?)?
+                    ManagerViewMode::from_str(&block_state.get_value_from_static_select()?)?
             }
             BlockSectionRouter::ActionTypeSelected => parsed_submission
                 .response

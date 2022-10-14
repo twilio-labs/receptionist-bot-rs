@@ -1,6 +1,6 @@
 #[cfg(any(feature = "tempdb", feature = "dynamodb"))]
 use crate::database::get_responses_for_collaborator;
-use crate::{BlockSectionRouter, EnumUtils, ReceptionistResponse};
+use crate::{get_response_by_id, BlockSectionRouter, EnumUtils, ReceptionistResponse};
 use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
@@ -10,24 +10,19 @@ use strum::{EnumString, IntoEnumIterator};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct MetaForManagerView {
+    pub current_mode: ManagerViewMode,
     pub user_id: String,
-    pub current_mode: ManagerViewModes,
+    pub existing_response_id: Option<String>,
     pub response: Option<ReceptionistResponse>,
 }
 
 impl MetaForManagerView {
-    pub fn new(current_mode: ManagerViewModes, user_id: String) -> Self {
-        let response = match current_mode {
-            ManagerViewModes::Home => None,
-            ManagerViewModes::CreateResponse => Some(ReceptionistResponse::default()),
-            ManagerViewModes::EditResponse => None,
-            ManagerViewModes::DeleteResponse => None,
-        };
-
+    pub fn new(current_mode: ManagerViewMode, user_id: String) -> Self {
         Self {
             current_mode,
-            response,
             user_id,
+            response: None,
+            existing_response_id: None,
         }
     }
 }
@@ -35,8 +30,9 @@ impl MetaForManagerView {
 impl Default for MetaForManagerView {
     fn default() -> Self {
         Self {
-            current_mode: ManagerViewModes::Home,
+            current_mode: ManagerViewMode::Home,
             response: None,
+            existing_response_id: None,
             user_id: "".to_string(),
         }
     }
@@ -46,7 +42,7 @@ pub fn select_mode(
     mode_str_value: &str,
     metadata: &MetaForManagerView,
 ) -> Result<MetaForManagerView> {
-    if let Ok(mode) = ManagerViewModes::from_str(mode_str_value) {
+    if let Ok(mode) = ManagerViewMode::from_str(mode_str_value) {
         Ok(MetaForManagerView::new(mode, metadata.user_id.to_owned()))
     } else {
         bail!("unable to select mode");
@@ -66,22 +62,24 @@ pub async fn new_manager_view(meta: &MetaForManagerView) -> SlackView {
     let mut blocks: Vec<SlackBlock> = meta.current_mode.to_editor_blocks();
 
     let extra_blocks = match &meta.current_mode {
-        ManagerViewModes::Home => Vec::default(),
-        ManagerViewModes::CreateResponse => {
-            if let Some(response) = &meta.response {
-                response.to_editor_blocks()
-            } else {
-                ReceptionistResponse::default().to_editor_blocks()
-            }
-        }
-        ManagerViewModes::EditResponse => {
+        ManagerViewMode::Home => Vec::default(),
+        ManagerViewMode::CreateResponse => ReceptionistResponse::default().to_editor_blocks(),
+        ManagerViewMode::EditResponse => {
             let mut editing_blocks = response_selector_blocks(&meta.user_id).await;
-            if let Some(response) = &meta.response {
-                editing_blocks.extend(response.to_editor_blocks())
+
+            if let Some(response_id) = &meta.existing_response_id {
+                let response_to_edit = get_response_by_id(response_id).await;
+                editing_blocks.extend(
+                    response_to_edit
+                        .expect(&format!(
+                            "cannot edit response that does not exist. id: {response_id}"
+                        ))
+                        .to_editor_blocks(),
+                )
             }
             editing_blocks
         }
-        ManagerViewModes::DeleteResponse => response_selector_blocks(&meta.user_id).await,
+        ManagerViewMode::DeleteResponse => response_selector_blocks(&meta.user_id).await,
     };
 
     blocks.extend(extra_blocks);
@@ -126,33 +124,33 @@ async fn response_selector_blocks(user_id: &str) -> Vec<SlackBlock> {
 
 #[derive(EnumUtils!, EnumString, Serialize, Deserialize, Clone)]
 #[strum(serialize_all = "kebab_case")]
-pub enum ManagerViewModes {
+pub enum ManagerViewMode {
     Home,
     CreateResponse,
     EditResponse,
     DeleteResponse,
 }
 
-impl Default for ManagerViewModes {
+impl Default for ManagerViewMode {
     fn default() -> Self {
         Self::Home
     }
 }
 
-impl ManagerViewModes {
+impl ManagerViewMode {
     fn to_choice_item(&self) -> SlackBlockChoiceItem<SlackBlockPlainTextOnly> {
         let description = match &self {
-            ManagerViewModes::Home => "Management Home",
-            ManagerViewModes::CreateResponse => "Create a Receptionist Response",
-            ManagerViewModes::EditResponse => "Edit an existing Response",
-            ManagerViewModes::DeleteResponse => "Delete an existing Response",
+            ManagerViewMode::Home => "Management Home",
+            ManagerViewMode::CreateResponse => "Create a Receptionist Response",
+            ManagerViewMode::EditResponse => "Edit an existing Response",
+            ManagerViewMode::DeleteResponse => "Delete an existing Response",
         };
 
         SlackBlockChoiceItem::new(pt!(description), self.to_string())
     }
 
     fn to_editor_blocks(&self) -> Vec<SlackBlock> {
-        let options: Vec<SlackBlockChoiceItem<SlackBlockPlainTextOnly>> = ManagerViewModes::iter()
+        let options: Vec<SlackBlockChoiceItem<SlackBlockPlainTextOnly>> = ManagerViewMode::iter()
             .map(|management_type| management_type.to_choice_item())
             .collect();
 

@@ -1,5 +1,5 @@
 use super::SlackStateWorkaround;
-use crate::manager_ui::{new_manager_view, ManagerViewModes, MetaForManagerView};
+use crate::manager_ui::{new_manager_view, ManagerViewMode, MetaForManagerView};
 use axum::{
     extract::{Extension, Form},
     http::StatusCode,
@@ -24,7 +24,7 @@ pub async fn handle_slack_command(
     payload: SlackCommandEvent,
 ) -> (StatusCode, Value) {
     let view = new_manager_view(&MetaForManagerView::new(
-        ManagerViewModes::Home,
+        ManagerViewMode::Home,
         payload.user_id.to_string(),
     ))
     .await;

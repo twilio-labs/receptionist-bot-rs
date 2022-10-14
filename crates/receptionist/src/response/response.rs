@@ -1,10 +1,7 @@
-use super::{
-    actions::Action,
-    conditions::Condition,
-    listeners::{ListenerEvent, ListenerEventDiscriminants},
-    traits::{ForListenerEvent, SlackEditor},
+use crate::{
+    add_emoji_colons, Action, BlockSectionRouter, Condition, ForListenerEvent, ListenerEvent,
+    ListenerEventDiscriminants, SlackBlockValidationError, SlackEditor,
 };
-use crate::{add_emoji_colons, BlockSectionRouter, SlackBlockValidationError};
 use anyhow::{anyhow, bail, Result};
 use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
